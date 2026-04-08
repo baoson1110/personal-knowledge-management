@@ -1,0 +1,12 @@
+{
+  "name": "File-Back Status",
+  "version": "1",
+  "description": "User-triggered hook to report all outputs pending file-back into the wiki.",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Check tools/.fileback-manifest.json and the outputs/ directory to report all outputs pending file-back. List each output file with its status (pending or filed). For any pending outputs, summarize what insights they contain that have not yet been folded back into the wiki."
+  }
+}

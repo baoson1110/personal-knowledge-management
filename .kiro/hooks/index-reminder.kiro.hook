@@ -1,0 +1,13 @@
+{
+  "name": "Index Reminder",
+  "version": "1",
+  "description": "After a write operation, remind the LLM to update wiki/index.md and wiki/_brief.md if not already done.",
+  "when": {
+    "type": "postToolUse",
+    "toolTypes": ["write"]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A write operation just completed. If the write modified files in wiki/ or outputs/, check whether wiki/index.md and wiki/_brief.md have already been updated in this operation. If they have not been updated yet, update them now to reflect any new or changed content. The index must list all wiki pages with links and one-line summaries, and the brief must summarize the wiki's current coverage."
+  }
+}

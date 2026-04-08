@@ -1,0 +1,13 @@
+{
+  "name": "Wiki Validate",
+  "version": "1",
+  "description": "When a wiki file is edited, automatically validate its frontmatter, internal links, and formatting.",
+  "when": {
+    "type": "fileEdited",
+    "patterns": ["wiki/**"]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A wiki file was just edited. Validate the edited file by checking: (1) all 7 required YAML frontmatter fields are present and valid (title, domain, tags, created, updated, source, confidence), (2) all [[backlinks]] resolve to existing wiki files, (3) the file follows wiki formatting conventions (correct backlink syntax, concept files ≤150 lines, summary files have required sections). Report any issues found."
+  }
+}

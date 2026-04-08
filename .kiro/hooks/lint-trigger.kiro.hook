@@ -1,0 +1,12 @@
+{
+  "name": "Lint Trigger",
+  "version": "1",
+  "description": "User-triggered hook to execute the full wiki lint operation.",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Execute the full wiki lint operation following the lint-rules steering file (.kiro/steering/lint-rules.md). Scan the wiki for: broken internal [[backlinks]], orphan files with no inbound links, files missing required frontmatter fields, and concept names referenced in wiki text but lacking their own concept file. Create skeleton concept files (max 5 per run) for missing concepts with confidence: low and [needs verification] placeholders. Update wiki/_brief.md and report a summary of issues found, concepts created, and links fixed."
+  }
+}

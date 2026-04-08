@@ -1,0 +1,15 @@
+.kiro/specs
+.obsidian/
+docs/
+graphify/
+llm-knowledge-base/
+__pycache__
+staging/**
+!staging/**/
+!staging/**/.gitkeep
+raw/**
+!raw/**/
+!raw/**/.gitkeep
+wiki/**
+!wiki/**/
+!wiki/**/.gitkeep

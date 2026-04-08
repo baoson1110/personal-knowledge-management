@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "sources": {
+    "raw/articles/rl.md": {
+      "status": "compiled",
+      "compiled_at": "2026-04-08T12:00:00Z",
+      "key_insight": "RL algorithms are combinations of three primitives (value function, policy, model), with Actor-Critic at the intersection as the dominant modern framework",
+      "wiki_files": [
+        "wiki/summaries/rl.md",
+        "wiki/concepts/reinforcement-learning.md",
+        "wiki/concepts/actor-critic.md"
+      ]
+    }
+  }
+}
