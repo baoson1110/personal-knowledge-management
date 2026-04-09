@@ -125,7 +125,6 @@ Hooks automate common operations. They live in `.kiro/hooks/`:
 | Lint Trigger | User-triggered | Runs full lint operation |
 | Scan Trigger | User-triggered | Scans and compiles pending sources |
 | File-Back Status | User-triggered | Reports pending file-backs |
-| Session End Check | Session ends | Reminds about pending file-backs |
 
 ## Wiki Conventions
 
