@@ -56,13 +56,32 @@ report: overview of transformer architectures
 
 This creates a report in `outputs/reports/` and identifies insights that could be filed back into the wiki.
 
-### 5. File back insights
+### 5. File back insights from queries and reports
+
+When a `query:` or `report:` generates new insights not yet in the wiki, here's the process to fold them back:
+
+1. After a query/report, Kiro lists **file-back candidates** — new concepts or updates to existing pages.
+2. Review the candidates and decide which ones to file back.
+3. Ask Kiro to file them back, or use the `file-back:` command on a report:
 
 ```
 file-back: outputs/reports/report-transformers-2026-04-08.md
 ```
 
-New insights from the report get folded back into the wiki, making it richer.
+4. Kiro updates or creates wiki pages, updates `wiki/index.md`, and records the changes in `tools/.fileback-manifest.json`.
+5. To check pending file-backs:
+
+```bash
+tools/file-back.sh pending
+```
+
+6. To manually mark a report as filed (after you've handled it yourself):
+
+```bash
+tools/file-back.sh mark outputs/reports/report-topic-YYYY-MM-DD.md
+```
+
+**Important**: Don't run `file-back.sh mark` before the wiki pages are actually updated — the manifest tracks which wiki files were touched. If you mark it first, the workflow thinks it's already done. Let Kiro handle the full `file-back:` flow, or update wiki pages manually before marking.
 
 ### 6. Health check
 

@@ -13,3 +13,6 @@ raw/**
 wiki/**
 !wiki/**/
 !wiki/**/.gitkeep
+outputs/**
+!outputs/**/
+!outputs/**/.gitkeep
