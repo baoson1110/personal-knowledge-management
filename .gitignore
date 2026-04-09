@@ -4,6 +4,8 @@ docs/
 graphify/
 llm-knowledge-base/
 __pycache__
+tools/.compile-manifest.json
+tools/.fileback-manifest.json
 staging/**
 !staging/**/
 !staging/**/.gitkeep
