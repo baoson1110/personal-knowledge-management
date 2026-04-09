@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Protect Raw Directory",
+  "description": "Blocks write operations targeting files in the raw/ directory. Raw sources are immutable and should never be modified by the agent.",
+  "version": "1",
+  "when": {
+    "type": "preToolUse",
+    "toolTypes": [
+      "write"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Check if this write operation targets a file in the raw/ directory. If it does, ACCESS DENIED — the raw/ directory is immutable. Do not proceed with the write. Raw source files must never be modified by the agent. If the write targets a file outside raw/, proceed normally."
+  }
+}
