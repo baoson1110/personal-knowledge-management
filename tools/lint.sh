@@ -4,7 +4,7 @@
 #
 # Scans all markdown files in wiki/ and reports:
 #   1. Broken [[...]] links (target file does not exist)
-#   2. Orphan files (zero inbound links, excluding index.md and _brief.md)
+#   2. Orphan files (zero inbound links, excluding index.md)
 #   3. Missing frontmatter fields (7 required fields)
 #   4. Missing concepts (referenced via [[...]] but no file in wiki/concepts/)
 #
@@ -28,7 +28,7 @@ Checks performed:
   1. Broken links     — [[...]] references where the target .md file
                         does not exist anywhere in wiki/
   2. Orphan files     — wiki files with zero inbound [[...]] links
-                        (index.md and _brief.md are excluded)
+                        (index.md is excluded)
   3. Missing fields   — wiki files missing any of the 7 required
                         frontmatter fields: title, domain, tags,
                         created, updated, source, confidence
@@ -156,8 +156,8 @@ done < "$WIKI_FILES_LIST"
 while IFS= read -r filepath; do
   relpath="${filepath#"$REPO_ROOT"/}"
   base="$(basename "$filepath")"
-  # Exclude index.md and _brief.md
-  if [[ "$base" == "index.md" || "$base" == "_brief.md" ]]; then
+  # Exclude index.md
+  if [[ "$base" == "index.md" ]]; then
     continue
   fi
   slug="$(basename "$filepath" .md)"

@@ -1,5 +1,5 @@
 ---
-inclusion: manual
+inclusion: always
 ---
 
 # Query Workflow
@@ -8,13 +8,12 @@ Procedure for answering user queries and generating reports from wiki content. A
 
 ## Step 1 — Load Context
 
-1. Read `wiki/_brief.md` first to understand the wiki's current coverage, domains, and key concepts.
-2. Use the brief to determine which areas of the wiki are likely relevant to the query.
+1. Read `wiki/index.md` to understand the wiki's current coverage and identify candidate pages by title and summary.
 
 ## Step 2 — Search the Wiki
 
 1. Search `wiki/` for pages relevant to the user's question.
-2. Start with `wiki/index.md` to identify candidate pages by title and summary.
+2. Use `wiki/index.md` entries to identify the most relevant concept, summary, and topic files.
 3. Read the most relevant concept files, summary files, and topic files.
 4. Follow `[[backlinks]]` to discover related pages that may contain supporting information.
 5. If available, use `tools/search.py` for full-text search across wiki files.

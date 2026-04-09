@@ -28,7 +28,7 @@ tools/promote.sh --all
 
 ### 2. Compile into the wiki
 
-Once a file lands in `raw/`, the **auto-ingest hook** fires automatically and the LLM compiles it — creating a summary, extracting concepts, updating the index and brief.
+Once a file lands in `raw/`, the **auto-ingest hook** fires automatically and the LLM compiles it — creating a summary, extracting concepts, and updating the index.
 
 To manually scan and compile all pending sources:
 
@@ -93,7 +93,6 @@ wiki/             # LLM-owned knowledge base (Obsidian-compatible)
   topics/         #   Deep-dive topic pages
   domains/        #   Map of Content entry points
   index.md        #   Catalog of all wiki pages
-  _brief.md       #   One-paragraph wiki overview
 
 outputs/          # Generated reports and notes
   reports/        #   report-<topic>-YYYY-MM-DD.md
@@ -126,8 +125,6 @@ Hooks automate common operations. They live in `.kiro/hooks/`:
 | Lint Trigger | User-triggered | Runs full lint operation |
 | Scan Trigger | User-triggered | Scans and compiles pending sources |
 | File-Back Status | User-triggered | Reports pending file-backs |
-| Index Reminder | After write ops | Reminds to update index and brief |
-| Brief Preload | On prompt submit | Loads wiki brief as context |
 | Session End Check | Session ends | Reminds about pending file-backs |
 
 ## Wiki Conventions

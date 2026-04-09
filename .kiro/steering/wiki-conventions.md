@@ -82,11 +82,10 @@ Every summary file MUST contain these four sections:
 3. **Key Insights** — the most important takeaways
 4. **Related Concepts** — list of related concept links using `[[backlink]]` syntax
 
-## Index and Brief Files
+## Index File
 
 - `wiki/index.md` — catalog of all wiki pages, each with a `[[link]]` and a one-line summary, organized by category (Concepts, Summaries, Topics, Domains)
-- `wiki/_brief.md` — single-paragraph wiki overview, domain list with file counts, and top 5–10 key concepts
-- Both files MUST be updated after every ingest, file-back, or lint operation
+- `wiki/index.md` MUST be updated after every ingest, file-back, or lint operation
 
 ## Domain Maps of Content (`wiki/domains/`)
 

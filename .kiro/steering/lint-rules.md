@@ -21,7 +21,7 @@ When the user issues a `lint` command, scan the entire `wiki/` directory and che
 
 - Build an inbound link map across all wiki files.
 - A file is an orphan if it has **zero** inbound `[[...]]` links from other wiki files.
-- Exclude `wiki/index.md` and `wiki/_brief.md` from orphan detection (they are structural files).
+- Exclude `wiki/index.md` from orphan detection (it is a structural file).
 - Report each orphan file path.
 
 ### 3. Missing Frontmatter
@@ -63,13 +63,12 @@ When the user issues a `web-impute: <topic>` command:
 5. Include `[needs verification]` markers on any claims that could not be confirmed from multiple sources.
 6. Add `[[backlinks]]` to related existing wiki pages.
 
-## Brief Update After Lint
+## Index Update After Lint
 
 After the lint run completes:
 
-1. Update `wiki/_brief.md` to reflect any changes made during lint (new skeleton files, fixed links).
-2. Update `wiki/index.md` to include entries for any newly created skeleton concept files.
-3. Update the `updated:` frontmatter field in both files.
+1. Update `wiki/index.md` to include entries for any newly created skeleton concept files.
+2. Update the `updated:` frontmatter field.
 
 ## Lint Summary Report
 
@@ -81,4 +80,4 @@ After all checks and fixes are complete, report a summary to the user:
 - **Missing concepts detected**: count and list of referenced concepts without files.
 - **Skeleton concepts created**: count and list of new skeleton files created (up to 5).
 - **Links fixed**: count of any links that were corrected.
-- **Brief and index updated**: confirmation that both were refreshed.
+- **Index updated**: confirmation that the index was refreshed.

@@ -8,6 +8,6 @@
   },
   "then": {
     "type": "askAgent",
-    "prompt": "A new file was created in raw/. Follow the ingest-workflow steering file (.kiro/steering/ingest-workflow.md) to compile this new raw source into the wiki. Create a summary file in wiki/summaries/, extract 1-3 concept files into wiki/concepts/, update the relevant domain MOC in wiki/domains/, and update wiki/index.md and wiki/_brief.md to reflect the new content. Update tools/.compile-manifest.json to record the compilation."
+    "prompt": "A new file was created in raw/. Follow the ingest-workflow steering file (.kiro/steering/ingest-workflow.md) to compile this new raw source into the wiki. Create a summary file in wiki/summaries/, extract 1-3 concept files into wiki/concepts/, update the relevant domain MOC in wiki/domains/, and update wiki/index.md to reflect the new content. Update tools/.compile-manifest.json to record the compilation."
   }
 }

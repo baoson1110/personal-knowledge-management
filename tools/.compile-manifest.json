@@ -1,6 +1,51 @@
 {
   "version": 1,
   "sources": {
+    "raw/articles/AUC-curve.md": {
+      "status": "compiled",
+      "compiled_at": "2026-04-08T18:00:00Z",
+      "key_insight": "Stub source — AUC-ROC is the area under the ROC curve, a threshold-independent classifier metric; see pr-auc for the imbalanced-data alternative",
+      "wiki_files": [
+        "wiki/summaries/auc-curve.md",
+        "wiki/concepts/auc-roc.md"
+      ]
+    },
+    "raw/articles/Pr-auc-and-pr-auc.md": {
+      "status": "compiled",
+      "compiled_at": "2026-04-08T18:01:00Z",
+      "key_insight": "PR-AUC focuses on the positive class for imbalanced data; PR-AUC Lift normalizes it by class prevalence to enable cross-dataset comparison",
+      "wiki_files": [
+        "wiki/summaries/pr-auc-and-pr-auc-lift.md",
+        "wiki/concepts/pr-auc.md"
+      ]
+    },
+    "raw/articles/finetuning_and_tuning.md": {
+      "status": "compiled",
+      "compiled_at": "2026-04-08T18:02:00Z",
+      "key_insight": "Fine-tuning adapts pre-trained model weights to new tasks; hyperparameter tuning optimizes training configuration — they are orthogonal and often done together",
+      "wiki_files": [
+        "wiki/summaries/finetuning-and-tuning.md",
+        "wiki/concepts/fine-tuning.md"
+      ]
+    },
+    "raw/articles/python-protocol.md": {
+      "status": "compiled",
+      "compiled_at": "2026-04-08T18:03:00Z",
+      "key_insight": "Python Protocol enables static duck typing — any class implementing the required methods satisfies the Protocol without inheritance, enabling flexible type-safe interfaces",
+      "wiki_files": [
+        "wiki/summaries/python-protocol.md",
+        "wiki/concepts/python-protocol.md"
+      ]
+    },
+    "raw/articles/stl-and-mstl0-decomposition.md": {
+      "status": "compiled",
+      "compiled_at": "2026-04-08T18:04:00Z",
+      "key_insight": "STL and MSTL are mathematically identical for a single period when parameters match; MSTL adds automation and multi-seasonality support",
+      "wiki_files": [
+        "wiki/summaries/stl-and-mstl-decomposition.md",
+        "wiki/concepts/stl-decomposition.md"
+      ]
+    },
     "raw/articles/rl.md": {
       "status": "compiled",
       "compiled_at": "2026-04-08T12:00:00Z",
@@ -9,6 +54,37 @@
         "wiki/summaries/rl.md",
         "wiki/concepts/reinforcement-learning.md",
         "wiki/concepts/actor-critic.md"
+      ]
+    },
+    "raw/articles/understanding_bellman_expectation.md": {
+      "status": "compiled",
+      "compiled_at": "2026-04-08T14:00:00Z",
+      "key_insight": "R(s) in the Bellman Expectation Equation is the expected immediate reward for a state; fixing a policy in an MDP collapses it into an MRP",
+      "wiki_files": [
+        "wiki/summaries/understanding-bellman-expectation.md",
+        "wiki/concepts/bellman-equation.md",
+        "wiki/concepts/markov-reward-process.md"
+      ]
+    },
+    "raw/articles/reward-is-enough-hypothesis.md": {
+      "status": "compiled",
+      "compiled_at": "2026-04-08T16:00:00Z",
+      "key_insight": "The Reward is Enough hypothesis argues all intelligence emerges from reward maximization; delayed consequences and the MDP/POMDP distinction are foundational RL challenges",
+      "wiki_files": [
+        "wiki/summaries/reward-is-enough-hypothesis.md",
+        "wiki/concepts/reward-is-enough.md",
+        "wiki/concepts/delayed-consequences.md",
+        "wiki/concepts/markov-decision-process.md"
+      ]
+    },
+    "raw/articles/rl-introduction.md": {
+      "status": "compiled",
+      "compiled_at": "2026-04-08T20:00:00Z",
+      "key_insight": "Sutton & Barto Chapter 1 defines RL as a third ML paradigm built on four elements (policy, reward, value function, model); the exploration-exploitation tradeoff and TD learning are its distinguishing features",
+      "wiki_files": [
+        "wiki/summaries/rl-introduction.md",
+        "wiki/concepts/exploration-exploitation.md",
+        "wiki/concepts/rl-elements.md"
       ]
     }
   }

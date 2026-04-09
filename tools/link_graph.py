@@ -119,12 +119,12 @@ def find_broken_links(graph: dict) -> List[Tuple[str, str]]:
 def find_orphan_files(graph: dict) -> List[str]:
     """Return slugs that have zero inbound links from other wiki files.
 
-    Excludes ``"index"`` and ``"_brief"`` since they are structural files
-    that are not expected to be linked *to* by other pages.
+    Excludes ``"index"`` since it is a structural file
+    that is not expected to be linked *to* by other pages.
     """
     nodes: Set[str] = graph["nodes"]
     inbound: Dict[str, Set[str]] = graph["inbound"]
-    excluded = {"index", "_brief"}
+    excluded = {"index"}
 
     orphans: List[str] = []
     for slug in sorted(nodes):
@@ -191,12 +191,12 @@ def check_index_completeness(graph: dict) -> List[str]:
     ``index.md``.
 
     A page "has an entry" if the ``"index"`` node's outbound edges contain
-    a link to that page's slug.  ``index`` and ``_brief`` are excluded
-    from the check since they are structural files.
+    a link to that page's slug.  ``index`` is excluded
+    from the check since it is a structural file.
     """
     nodes: Set[str] = graph["nodes"]
     edges: Dict[str, Set[str]] = graph["edges"]
-    excluded = {"index", "_brief"}
+    excluded = {"index"}
 
     index_links = edges.get("index", set())
 

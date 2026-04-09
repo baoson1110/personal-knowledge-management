@@ -19,7 +19,7 @@ Procedure for folding insights from outputs (reports, notes) back into the wiki.
 
 ## Step 2 — Identify New Insights
 
-1. Read `wiki/_brief.md` to understand current wiki coverage.
+1. Read `wiki/index.md` to understand current wiki coverage.
 2. Compare the output's content against existing wiki pages.
 3. Identify insights that are **not yet present** in the wiki:
    - New concepts not covered by any existing concept file.
@@ -46,11 +46,10 @@ For each new insight identified:
    - At least one `[[backlink]]` to an existing wiki file.
    - Maximum 150 lines.
 
-## Step 4 — Update Index and Brief
+## Step 4 — Update Index
 
 1. **`wiki/index.md`**: Add entries for any new wiki files created. Update summaries for any modified files. Update the `updated:` frontmatter field.
-2. **`wiki/_brief.md`**: Update the wiki overview paragraph, domain file counts, and key concepts list. Update the `updated:` frontmatter field.
-3. Both files MUST be updated before reporting completion.
+2. The index MUST be updated before reporting completion.
 
 ## Step 5 — Update the File-Back Manifest
 
@@ -78,5 +77,5 @@ Report a summary of what was filed back:
 - Number of existing wiki files updated.
 - Number of new concept files created.
 - List of all wiki files touched.
-- Confirmation that index and brief were updated.
+- Confirmation that the index was updated.
 - If no new insights were found, report: "No new insights to file back — output content is already covered in the wiki."

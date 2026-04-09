@@ -56,11 +56,10 @@ Create a single summary file at `wiki/summaries/<source-slug>.md` with:
   - Bridge notes to other domains
 - If fewer than 10 concepts share the domain and no MOC exists, skip MOC creation.
 
-## Step 5 — Update Index and Brief
+## Step 5 — Update Index
 
 - **`wiki/index.md`**: Add entries for the new summary and concept files under the appropriate sections (Concepts, Summaries). Each entry needs a `[[link]]` and a one-line summary. Update the `updated:` frontmatter field.
-- **`wiki/_brief.md`**: Update the wiki overview paragraph, domain file counts, and key concepts list to reflect the new content. Update the `updated:` frontmatter field.
-- Both files MUST be updated before reporting completion.
+- The index MUST be updated before reporting completion.
 
 ## Step 6 — Update the Compile Manifest
 
