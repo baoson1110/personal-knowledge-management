@@ -82,6 +82,23 @@ Every summary file MUST contain these four sections:
 3. **Key Insights** — the most important takeaways
 4. **Related Concepts** — list of related concept links using `[[backlink]]` syntax
 
+## Topic Files (`wiki/topics/`)
+
+Topic files aggregate and connect multiple concepts into a broader theme. They serve as entry points for understanding a subject area that spans several atomic concepts.
+
+### Classification Rule
+
+- If the content describes a **single atomic idea** → create a concept file in `wiki/concepts/`
+- If the content **aggregates, compares, or connects multiple concepts** → create a topic file in `wiki/topics/`
+- **Never place wiki content files at the wiki root** — only `wiki/index.md` lives there
+
+### Requirements
+
+- Filename is the topic slug: `<topic-slug>.md`
+- Must include valid YAML frontmatter with all 7 required fields
+- Must link to at least 2 concept files via `[[backlinks]]`
+- Should provide comparative analysis, selection guidance, or a unifying narrative across the linked concepts
+
 ## Index File
 
 - `wiki/index.md` — catalog of all wiki pages, each with a `[[link]]` and a one-line summary, organized by category (Concepts, Summaries, Topics, Domains)

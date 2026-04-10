@@ -21,10 +21,12 @@ Procedure for folding insights from outputs (reports, notes) back into the wiki.
 
 1. Read `wiki/index.md` to understand current wiki coverage.
 2. Compare the output's content against existing wiki pages.
-3. Identify insights that are **not yet present** in the wiki:
+3. Run `python3 tools/search.py "<key terms>"` to find existing pages that may already cover the insights.
+4. Identify insights that are **not yet present** in the wiki:
    - New concepts not covered by any existing concept file.
    - New information that extends or refines existing concept or summary files.
    - New connections between existing concepts not yet documented.
+5. Check if the output reveals topic-level connections (comparisons, selection guides, unifying narratives across 3+ concepts). If so, consider creating or updating a topic file in `wiki/topics/`.
 
 ### Deduplication Rules
 
@@ -46,12 +48,20 @@ For each new insight identified:
    - At least one `[[backlink]]` to an existing wiki file.
    - Maximum 150 lines.
 
-## Step 4 — Update Index
+## Step 4 — Cross-Link and Check Domain Status
+
+1. For each concept created or updated, run the cross-linking pass:
+   - Check for other concepts with the same domain or overlapping tags.
+   - Add bidirectional `[[backlinks]]` where semantically relevant links are missing.
+2. Run `python3 tools/analyze-wiki.py --domain-status` to check if any domain now qualifies for a MOC.
+3. If a domain has 10+ concepts and no MOC, create the domain MOC file.
+
+## Step 5 — Update Index
 
 1. **`wiki/index.md`**: Add entries for any new wiki files created. Update summaries for any modified files. Update the `updated:` frontmatter field.
 2. The index MUST be updated before reporting completion.
 
-## Step 5 — Update the File-Back Manifest
+## Step 6 — Update the File-Back Manifest
 
 Update `tools/.fileback-manifest.json` with the filed output:
 

@@ -35,6 +35,29 @@ When the user issues a `lint` command, scan the entire `wiki/` directory and che
 - If a referenced concept does not have a corresponding file in `wiki/concepts/`, flag it as a missing concept.
 - Exclude references that resolve to files in `wiki/summaries/`, `wiki/topics/`, or `wiki/domains/` — only flag truly missing pages.
 
+### 5. Topic Opportunities
+
+- Run `python3 tools/analyze-wiki.py --topic-candidates` to detect concept clusters.
+- Report any cluster of 3+ concepts in the same domain that share overlapping tags but have no topic page connecting them.
+- Present these as suggestions, not errors.
+
+### 6. Domain MOC Readiness
+
+- Run `python3 tools/analyze-wiki.py --domain-status` to check domain concept counts.
+- Report any domain with 10+ concepts that lacks a domain MOC file in `wiki/domains/`.
+- Report any domain with 8-9 concepts as "approaching threshold."
+
+### 7. Duplicate Concept Detection
+
+- Run `python3 tools/analyze-wiki.py --duplicates` to find concept pairs with high tag overlap (3+ shared tags) and similar titles (2+ shared title words).
+- Report potential duplicates for manual review and merge.
+
+### 8. Cross-Linking Gaps
+
+- Run `python3 tools/analyze-wiki.py --cross-linking` to analyze link density.
+- Report concepts with fewer than 2 outbound links to other concepts (weakly linked).
+- Report concept pairs in the same domain that have no link between them.
+
 ## Skeleton Creation Rules
 
 When lint identifies missing concept files:
@@ -78,6 +101,10 @@ After all checks and fixes are complete, report a summary to the user:
 - **Orphan files found**: count and list of files with no inbound links.
 - **Missing frontmatter**: count and list of files with incomplete frontmatter.
 - **Missing concepts detected**: count and list of referenced concepts without files.
+- **Topic opportunities**: count and list of concept clusters that could become topic pages.
+- **Domain MOC status**: domains ready for MOC creation (10+) and approaching threshold (8-9).
+- **Duplicate candidates**: count and list of concept pairs that may need merging.
+- **Cross-linking gaps**: count of weakly linked concepts and unlinked same-domain pairs.
 - **Skeleton concepts created**: count and list of new skeleton files created (up to 5).
 - **Links fixed**: count of any links that were corrected.
 - **Index updated**: confirmation that the index was refreshed.
