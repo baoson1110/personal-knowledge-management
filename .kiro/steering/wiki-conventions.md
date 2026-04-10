@@ -66,6 +66,16 @@ All internal cross-references between wiki pages MUST use Obsidian-compatible do
 - Every new wiki file MUST link to at least 1 existing wiki file
 - Every concept file MUST be reachable from `wiki/index.md` in at most 2 hops
 
+## Tag Registry (`wiki/tags.yml`)
+
+A canonical tag registry lives at `wiki/tags.yml`. It is the single source of truth for all tags used in wiki frontmatter.
+
+- Every tag in a `tags:` frontmatter field MUST exist as a canonical entry in `wiki/tags.yml`.
+- Common abbreviations and synonyms are listed as `aliases:` under their canonical tag (e.g. `rl` is an alias of `reinforcement-learning`).
+- When writing new wiki files, always check the registry and use the canonical form.
+- If a genuinely new tag is needed, add it to the registry first, then use it.
+- Lint check #9 will flag alias violations (auto-fixable) and unregistered tags.
+
 ## Concept Files (`wiki/concepts/`)
 
 - One atomic idea per file

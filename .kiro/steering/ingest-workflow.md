@@ -63,6 +63,16 @@ Before creating any new concept file:
   - At least one `[[backlink]]` to an existing wiki file.
 - Use lowercase hyphen-separated slugs for filenames.
 
+### Tag Registry Compliance
+
+Before assigning tags to any new or updated wiki file:
+
+1. Read `wiki/tags.yml` to load the canonical tag registry.
+2. Every tag in the `tags:` frontmatter field MUST exist as a canonical tag in the registry.
+3. If you want to use a tag that is listed as an alias (e.g. `rl`), use the canonical form instead (e.g. `reinforcement-learning`).
+4. If a tag you need does not exist in the registry at all, add it to `wiki/tags.yml` in the correct alphabetical position before using it.
+5. Never introduce abbreviations or synonyms of existing canonical tags — always reuse the canonical form.
+
 ## Step 4 — Cross-Link Related Concepts
 
 After creating or updating concepts, perform a cross-linking pass:

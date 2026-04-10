@@ -58,6 +58,15 @@ When the user issues a `lint` command, scan the entire `wiki/` directory and che
 - Report concepts with fewer than 2 outbound links to other concepts (weakly linked).
 - Report concept pairs in the same domain that have no link between them.
 
+### 9. Tag Registry Violations
+
+- Run `python3 tools/analyze-wiki.py --tag-audit` to validate all tags against `wiki/tags.yml`.
+- Report **alias violations**: tags that are known synonyms/abbreviations of a canonical tag (e.g. `rl` should be `reinforcement-learning`). These MUST be auto-fixed by replacing the alias with the canonical tag in the file's frontmatter.
+- Report **unregistered tags**: tags that do not appear in the registry at all. Present these to the user for decision:
+  - Add the tag to `wiki/tags.yml` as a new canonical tag, OR
+  - Replace it with an existing canonical tag.
+- Do NOT auto-add unregistered tags to the registry — only auto-fix alias violations.
+
 ## Skeleton Creation Rules
 
 When lint identifies missing concept files:
@@ -105,6 +114,8 @@ After all checks and fixes are complete, report a summary to the user:
 - **Domain MOC status**: domains ready for MOC creation (10+) and approaching threshold (8-9).
 - **Duplicate candidates**: count and list of concept pairs that may need merging.
 - **Cross-linking gaps**: count of weakly linked concepts and unlinked same-domain pairs.
+- **Tag alias violations**: count and list of tags auto-fixed to their canonical form.
+- **Unregistered tags**: count and list of tags not in `wiki/tags.yml`, with affected files.
 - **Skeleton concepts created**: count and list of new skeleton files created (up to 5).
 - **Links fixed**: count of any links that were corrected.
 - **Index updated**: confirmation that the index was refreshed.

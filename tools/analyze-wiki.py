@@ -19,9 +19,12 @@ from collections import Counter, defaultdict
 from itertools import combinations
 from pathlib import Path
 
+from wiki_validator import load_tag_registry, validate_tags
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
 WIKI_DIR = REPO_ROOT / "wiki"
+TAG_REGISTRY_PATH = WIKI_DIR / "tags.yml"
 
 DOMAIN_MOC_THRESHOLD = 10
 DOMAIN_MOC_WARNING_THRESHOLD = 8
@@ -281,6 +284,54 @@ def analyze_cross_linking(concepts: list[dict]) -> dict:
     }
 
 
+# --- Tag audit ---
+
+def audit_tags(all_files: list[dict]) -> dict:
+    """Audit all tags across wiki files against the canonical tag registry.
+
+    Returns dict with:
+      - unregistered: {tag: [file_paths...]}
+      - alias_violations: {alias: (canonical, [file_paths...])}
+      - tag_frequency: {tag: count}  (all tags, for reference)
+      - registry_loaded: bool
+    """
+    try:
+        canonical_map, alias_map = load_tag_registry(TAG_REGISTRY_PATH)
+        registry_loaded = True
+    except FileNotFoundError:
+        return {
+            "unregistered": {},
+            "alias_violations": {},
+            "tag_frequency": {},
+            "registry_loaded": False,
+        }
+
+    unregistered: dict[str, list[str]] = defaultdict(list)
+    alias_violations: dict[str, tuple[str, list[str]]] = {}
+    tag_frequency: Counter = Counter()
+
+    for f in all_files:
+        tags = f["frontmatter"].get("tags", [])
+        if not isinstance(tags, list):
+            continue
+        for tag in tags:
+            tag_frequency[tag] += 1
+        unreg, alias_hits = validate_tags(tags, canonical_map, alias_map)
+        for tag in unreg:
+            unregistered[tag].append(f["path"])
+        for alias, canonical in alias_hits:
+            if alias not in alias_violations:
+                alias_violations[alias] = (canonical, [])
+            alias_violations[alias][1].append(f["path"])
+
+    return {
+        "unregistered": dict(unregistered),
+        "alias_violations": dict(alias_violations),
+        "tag_frequency": dict(tag_frequency.most_common()),
+        "registry_loaded": registry_loaded,
+    }
+
+
 # --- CLI output formatting ---
 
 def print_domain_status(domain_info: dict) -> None:
@@ -367,8 +418,46 @@ def print_cross_linking(linking: dict) -> None:
         print()
 
 
+def print_tag_audit(tag_info: dict) -> None:
+    """Print tag audit report."""
+    print("=== Tag Audit ===")
+    print()
+
+    if not tag_info["registry_loaded"]:
+        print("  WARNING: wiki/tags.yml not found — tag audit skipped.")
+        print("  Create wiki/tags.yml to enable tag validation.")
+        print()
+        return
+
+    unreg = tag_info["unregistered"]
+    alias_v = tag_info["alias_violations"]
+
+    if not unreg and not alias_v:
+        print("  All tags are canonical. No issues found.")
+        print()
+        return
+
+    if alias_v:
+        print(f"  Alias violations ({len(alias_v)} tags should be renamed):")
+        for alias, (canonical, paths) in sorted(alias_v.items()):
+            print(f"    '{alias}' -> '{canonical}'")
+            for p in paths:
+                print(f"      - {p}")
+        print()
+
+    if unreg:
+        print(f"  Unregistered tags ({len(unreg)} tags not in wiki/tags.yml):")
+        for tag, paths in sorted(unreg.items()):
+            print(f"    '{tag}' (used in {len(paths)} file(s))")
+            for p in paths:
+                print(f"      - {p}")
+        print("  ACTION: Add these tags to wiki/tags.yml or replace with a canonical tag.")
+        print()
+
+
 def print_full_dashboard(domain_info: dict, topic_cands: list[dict],
-                         duplicates: list[dict], linking: dict) -> None:
+                         duplicates: list[dict], linking: dict,
+                         tag_info: dict | None = None) -> None:
     """Print the full wiki health dashboard."""
     print("=" * 60)
     print("  WIKI ANALYSIS DASHBOARD")
@@ -378,6 +467,8 @@ def print_full_dashboard(domain_info: dict, topic_cands: list[dict],
     print_topic_candidates(topic_cands)
     print_duplicate_candidates(duplicates)
     print_cross_linking(linking)
+    if tag_info is not None:
+        print_tag_audit(tag_info)
 
     issues = 0
     if domain_info["moc_ready"]:
@@ -388,6 +479,9 @@ def print_full_dashboard(domain_info: dict, topic_cands: list[dict],
         issues += len(duplicates)
     if linking["weakly_linked"]:
         issues += len(linking["weakly_linked"])
+    if tag_info:
+        issues += len(tag_info.get("unregistered", {}))
+        issues += len(tag_info.get("alias_violations", {}))
 
     print("=" * 60)
     print(f"  Total opportunities found: {issues}")
@@ -418,18 +512,23 @@ def main() -> int:
         help="Analyze cross-linking density between concepts",
     )
     parser.add_argument(
+        "--tag-audit", action="store_true",
+        help="Audit tags against the canonical registry (wiki/tags.yml)",
+    )
+    parser.add_argument(
         "--all", action="store_true",
         help="Run all analyses and show full dashboard",
     )
     args = parser.parse_args()
 
     if not any([args.domain_status, args.topic_candidates,
-                args.duplicates, args.cross_linking, args.all]):
+                args.duplicates, args.cross_linking, args.tag_audit, args.all]):
         args.all = True
 
     try:
         concepts = load_wiki_files("concepts")
         topics = load_wiki_files("topics")
+        summaries = load_wiki_files("summaries")
 
         if not concepts:
             print("No concept files found in wiki/concepts/")
@@ -440,8 +539,14 @@ def main() -> int:
         duplicates = find_duplicate_candidates(concepts)
         linking = analyze_cross_linking(concepts)
 
+        # Tag audit runs across all wiki files (concepts + summaries + topics)
+        tag_info = None
+        if args.tag_audit or args.all:
+            all_files = concepts + summaries + topics
+            tag_info = audit_tags(all_files)
+
         if args.all:
-            print_full_dashboard(domain_info, topic_cands, duplicates, linking)
+            print_full_dashboard(domain_info, topic_cands, duplicates, linking, tag_info)
         else:
             if args.domain_status:
                 print_domain_status(domain_info)
@@ -451,6 +556,8 @@ def main() -> int:
                 print_duplicate_candidates(duplicates)
             if args.cross_linking:
                 print_cross_linking(linking)
+            if args.tag_audit and tag_info is not None:
+                print_tag_audit(tag_info)
 
         return 0
     except Exception as exc:
