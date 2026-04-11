@@ -94,6 +94,8 @@ Detects broken links, orphan pages, missing frontmatter, and missing concepts. C
 ## Directory Structure
 
 ```
+asset/            # Downloaded images (shared across all markdown files)
+
 staging/          # Drop files here to prep before ingestion
   articles/       #   (mutable, LLM ignores this directory)
   papers/
@@ -158,9 +160,34 @@ Hooks automate common operations. They live in `.kiro/hooks/`:
 
 Edit `.kiro/steering/.local-rules.md` to override language, formatting, and content preferences. Steering files in `.kiro/steering/` govern all LLM behavior and can be evolved as your wiki grows.
 
+## Image Handling
+
+Raw source articles often contain images (diagrams, charts, figures). These are stored in the `asset/` folder at the repo root and referenced using Obsidian wikilink syntax (`![[asset/filename.png]]`). A symlink at `wiki/asset` points to `../asset` so images resolve correctly when browsing the `wiki/` folder as a standalone Obsidian vault.
+
+During ingest, the LLM carries relevant images into wiki pages:
+- Summary files include all key diagrams and figures from the source
+- Concept files include only images closely related to the concept (1–2 max)
+- Every embedded image has an italicized caption describing what it shows
+
+### Obsidian Web Clipper
+
+[Obsidian Web Clipper](https://obsidian.md/clipper) is a browser extension that converts web articles to markdown. Use it to clip articles into `staging/articles/`, then promote them to `raw/` with `tools/promote.sh`.
+
+### Local Images Plus
+
+The [Local Images Plus](https://github.com/Sergei-Korneev/obsidian-local-images-plus) community plugin downloads remote images referenced in clipped articles and rewrites the markdown links to point to local copies.
+
+Configuration (Settings → Community plugins → Local Images Plus):
+- **Media folder**: `asset`
+- **Folder to save new attachments**: "In the folder specified below"
+- **Move/delete/rename media folder**: Off (images are shared across notes)
+- **Process all new files**: On (auto-downloads images when Web Clipper creates a note)
+
+After clipping an article, Local Images Plus auto-processes it. For existing articles with remote URLs, trigger manually via Command Palette → "Local Images Plus: Download images locally".
+
 ## Tips
 
 - Open the wiki in Obsidian alongside Kiro for real-time browsing with graph view
-- Use [Obsidian Web Clipper](https://obsidian.md/clipper) to save articles as markdown into `staging/`
+- Use Obsidian Web Clipper to save articles as markdown into `staging/`
 - The wiki is just markdown files in a git repo — you get version history for free
 - Domain Maps of Content are created automatically when 10+ concepts share a domain
