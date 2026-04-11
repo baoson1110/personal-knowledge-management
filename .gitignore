@@ -18,3 +18,6 @@ wiki/**
 outputs/**
 !outputs/**/
 !outputs/**/.gitkeep
+asset/**
+!asset/**/
+!asset/**/.gitkeep
