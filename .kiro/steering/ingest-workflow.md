@@ -18,6 +18,7 @@ Step-by-step procedure for compiling a raw source document into the wiki. This s
 - Read the full contents of the raw source file.
 - Identify the document type (article, paper, repo README, image caption, etc.).
 - Note the file path — it becomes the `source:` frontmatter value for all generated wiki files.
+- **Inventory images**: Scan the source for image references (`![[asset/...]]`). For each image found, note its path and the surrounding context (section heading, caption text, nearby paragraph). This inventory will be used in Steps 2 and 3 to carry relevant images into wiki pages.
 
 ## Step 2 — Create the Summary File
 
@@ -28,7 +29,7 @@ Create a single summary file at `wiki/summaries/<source-slug>.md` with:
 - Set `source:` to the raw file path (e.g. `raw/articles/my-article.md`).
 - The body MUST contain exactly these four sections:
   1. **Executive Summary** — concise overview of the source.
-  2. **Deep Analysis** — detailed breakdown of key content.
+  2. **Deep Analysis** — detailed breakdown of key content. Embed key diagrams and figures from the source here, placed inline near the text that discusses them. Only include informative images (diagrams, charts, architecture figures) — skip decorative ones. Every image MUST have an italicized caption on the line below describing what it shows.
   3. **Key Insights** — the most important takeaways.
   4. **Related Concepts** — list of related concept links using `[[backlink]]` syntax.
 
@@ -61,6 +62,7 @@ Before creating any new concept file:
   - `confidence: high` and `source:` pointing to the raw file.
   - At most **150 lines**.
   - At least one `[[backlink]]` to an existing wiki file.
+  - Images from the source may be included if they are **closely related to the concept itself** (e.g., a defining diagram or core illustration). Prefer at most 1–2 images per concept file. Every image MUST have an italicized caption. If an image is only relevant to one source's framing, keep it in the summary instead.
 - Use lowercase hyphen-separated slugs for filenames.
 
 ### Tag Registry Compliance

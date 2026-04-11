@@ -76,6 +76,39 @@ A canonical tag registry lives at `wiki/tags.yml`. It is the single source of tr
 - If a genuinely new tag is needed, add it to the registry first, then use it.
 - Lint check #9 will flag alias violations (auto-fixable) and unregistered tags.
 
+## Image Embedding
+
+Wiki pages may embed images from the `asset/` folder when the source material contains meaningful visual content. Images are referenced using Obsidian-compatible wikilink syntax:
+
+```
+![[asset/filename.png]]
+```
+
+### Embedding Rules
+
+- Only embed images that are **informative** — diagrams, charts, architecture figures, data visualizations, mathematical graphs. Do NOT embed decorative images, logos, avatars, or screenshots of UI that don't convey technical content.
+- Every embedded image MUST have a caption on the line immediately below it, in italics:
+
+```
+![[asset/02626f722fc3af1ea3d711589d9a0150_MD5.png]]
+*Figure: The three phases of ChatGPT development — pretraining, SFT, and RLHF.*
+```
+
+- Captions should be concise and describe what the image shows, not just repeat the section heading.
+- Place images inline within the relevant section, close to the text that discusses them.
+
+### Summary Files
+
+Summary files should include all key diagrams and figures from the source. Since summaries are the primary record of a source document, preserving its visual content is important. Embed images in the Deep Analysis section where they support the narrative.
+
+### Concept Files
+
+Concept files may include images only when the image is **closely related to the concept itself** — e.g., a diagram that defines or illustrates the core idea. Since concept files aggregate knowledge from multiple sources and have a 150-line limit, be selective: prefer at most 1–2 images per concept file. If an image is only relevant to one source's framing of the concept, it belongs in the summary, not the concept page.
+
+### Topic Files
+
+Topic files may include images that help compare or connect the concepts they aggregate. Comparative diagrams or overview figures are good candidates.
+
 ## Concept Files (`wiki/concepts/`)
 
 - One atomic idea per file
