@@ -2,6 +2,7 @@
 .obsidian/
 docs/
 graphify/
+.DS_store
 llm-knowledge-base/
 __pycache__
 tools/.compile-manifest.json
