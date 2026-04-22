@@ -67,6 +67,23 @@ When the user issues a `lint` command, scan the entire `wiki/` directory and che
   - Replace it with an existing canonical tag.
 - Do NOT auto-add unregistered tags to the registry — only auto-fix alias violations.
 
+### 10. LaTeX Formula Formatting
+
+- Scan all wiki files for mathematical expressions that are **not** wrapped in LaTeX delimiters (`$...$` for inline, `$$...$$` for display).
+- Detect plain-text math patterns including:
+  - Function notation: `V(s)`, `Q(s, a)`, `R(s)`, `P(s'|s)`, `π(a|s)` outside `$` delimiters
+  - Operators and symbols: `Σ`, `argmax_a`, `max_a`, `γ`, `π`, `∈`, `≤`, `≥`, `→`, `∝` used as math outside `$` delimiters
+  - Standalone equations on their own line (e.g. `V(s) = R(s) + γ Σ P(s'|s) V(s')`) that should be display math `$$...$$`
+  - Subscript/superscript notation using Unicode characters (e.g. `Sₜ`, `V₀`, `O(N³)`, `O(n²)`) instead of LaTeX (`$S_t$`, `$V_0$`, `$O(N^3)$`, `$O(n^2)$`)
+  - Norm notation using Unicode (`‖...‖`) instead of LaTeX (`$\|...\|$`)
+- **Auto-fix**: Convert detected plain-text formulas to proper LaTeX:
+  - Inline formulas in prose → wrap with `$...$`
+  - Standalone equations on their own line → wrap with `$$...$$`
+  - Replace Unicode math symbols with LaTeX equivalents (e.g. `Σ` → `\sum`, `γ` → `\gamma`, `π` → `\pi`, `→` → `\to`, `∝` → `\propto`, `≤` → `\leq`, `≥` → `\geq`)
+  - Replace Unicode sub/superscripts with LaTeX notation (e.g. `Sₜ` → `$S_t$`, `N³` → `$N^3$`)
+- Report each file and the number of formulas converted.
+- **Exclusions**: Do not flag math symbols inside code blocks (`` ` `` or ``` ``` ```), or inside `[[backlink]]` syntax.
+
 ## Skeleton Creation Rules
 
 When lint identifies missing concept files:
@@ -116,6 +133,7 @@ After all checks and fixes are complete, report a summary to the user:
 - **Cross-linking gaps**: count of weakly linked concepts and unlinked same-domain pairs.
 - **Tag alias violations**: count and list of tags auto-fixed to their canonical form.
 - **Unregistered tags**: count and list of tags not in `wiki/tags.yml`, with affected files.
+- **LaTeX formatting fixes**: count and list of files where plain-text formulas were converted to LaTeX.
 - **Skeleton concepts created**: count and list of new skeleton files created (up to 5).
 - **Links fixed**: count of any links that were corrected.
 - **Index updated**: confirmation that the index was refreshed.
