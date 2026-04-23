@@ -13,6 +13,7 @@ Covers all lint checks defined in .kiro/steering/lint-rules.md:
   8. Cross-linking gaps (delegates to analyze-wiki.py)
   9. Tag registry violations (delegates to analyze-wiki.py)
  10. LaTeX formula formatting (audit + auto-fix)
+ 11. Index completeness (files missing from index, dangling index refs)
 
 Usage:
   python3 tools/wiki_lint.py                  # Full audit (report only)
@@ -20,6 +21,7 @@ Usage:
   python3 tools/wiki_lint.py --check broken   # Run a single check
   python3 tools/wiki_lint.py --check latex    # LaTeX audit only
   python3 tools/wiki_lint.py --check latex --fix  # LaTeX audit + fix
+  python3 tools/wiki_lint.py --check index    # Index completeness only
   python3 tools/wiki_lint.py --json           # Machine-readable output
 """
 
@@ -380,6 +382,27 @@ def fix_latex(files: list[dict]) -> list[dict]:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# CHECK 11 — Index Completeness
+# ══════════════════════════════════════════════════════════════════════════════
+
+def check_index_completeness(files: list[dict]) -> dict[str, list[str]]:
+    """Check that wiki/index.md references all wiki files and has no dangling refs.
+
+    Returns {"missing_from_index": [...], "dangling_in_index": [...]}.
+    """
+    wiki_slugs = {f["slug"] for f in files}
+    index_slugs = set(load_index_backlinks())
+
+    missing_from_index = sorted(wiki_slugs - index_slugs)
+    dangling_in_index = sorted(index_slugs - wiki_slugs)
+
+    return {
+        "missing_from_index": missing_from_index,
+        "dangling_in_index": dangling_in_index,
+    }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # Reporting
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -390,6 +413,7 @@ def print_report(
     missing: list[dict],
     latex_audit: list[dict],
     latex_fixes: list[dict] | None,
+    index_issues: dict[str, list[str]] | None = None,
 ) -> None:
     """Print a human-readable lint report."""
 
@@ -452,6 +476,26 @@ def print_report(
         else:
             print("\n  No fixes needed.")
 
+    _header("CHECK 11: Index Completeness")
+    if index_issues is not None:
+        missing_idx = index_issues["missing_from_index"]
+        dangling_idx = index_issues["dangling_in_index"]
+        if missing_idx:
+            print(f"  Files NOT referenced in wiki/index.md: {len(missing_idx)}")
+            for slug in missing_idx:
+                print(f"    MISSING: [[{slug}]]")
+        else:
+            print("  ✓ All wiki files are referenced in index.md.")
+        if dangling_idx:
+            print(f"  Dangling index references (no matching file): {len(dangling_idx)}")
+            for slug in dangling_idx:
+                print(f"    DANGLING: [[{slug}]]")
+        elif not missing_idx:
+            print("  ✓ No dangling references in index.md.")
+        print(f"  Total: {len(missing_idx)} missing, {len(dangling_idx)} dangling")
+    else:
+        print("  (skipped)")
+
     # ── Summary ──────────────────────────────────────────────────────────
     _header("SUMMARY")
     print(f"  Wiki files scanned:    {_file_count}")
@@ -463,6 +507,9 @@ def print_report(
     if latex_fixes is not None:
         total_fixed = sum(r["fixes"] for r in latex_fixes)
         print(f"  LaTeX auto-fixed:      {total_fixed} across {len(latex_fixes)} files")
+    if index_issues is not None:
+        print(f"  Index missing:         {len(index_issues['missing_from_index'])} files")
+        print(f"  Index dangling:        {len(index_issues['dangling_in_index'])} refs")
     print()
     print("  Tip: Run `python3 tools/analyze-wiki.py --all` for structural")
     print("  checks (domains, topics, duplicates, cross-linking, tags).")
@@ -475,9 +522,10 @@ def build_json_report(
     missing: list[dict],
     latex_audit: list[dict],
     latex_fixes: list[dict] | None,
+    index_issues: dict[str, list[str]] | None = None,
 ) -> dict:
     """Build a machine-readable JSON report."""
-    return {
+    report = {
         "files_scanned": _file_count,
         "broken_links": broken,
         "orphan_files": orphans,
@@ -490,6 +538,9 @@ def build_json_report(
         },
         "latex_fixes": latex_fixes,
     }
+    if index_issues is not None:
+        report["index_completeness"] = index_issues
+    return report
 
 
 # ── Global for summary ───────────────────────────────────────────────────────
@@ -500,7 +551,7 @@ _file_count: int = 0
 # CLI
 # ══════════════════════════════════════════════════════════════════════════════
 
-CHECKS = ["broken", "orphans", "frontmatter", "missing", "latex"]
+CHECKS = ["broken", "orphans", "frontmatter", "missing", "latex", "index"]
 
 
 def main() -> int:
@@ -539,6 +590,7 @@ def main() -> int:
     fm_issues = check_frontmatter(files) if (run_all or target == "frontmatter") else []
     missing = check_missing_concepts(files) if (run_all or target == "missing") else []
     latex_results = audit_latex(files) if (run_all or target == "latex") else []
+    index_issues = check_index_completeness(files) if (run_all or target == "index") else None
 
     # Auto-fix if requested
     latex_fixes: list[dict] | None = None
@@ -547,13 +599,15 @@ def main() -> int:
 
     # Output
     if args.json_output:
-        report = build_json_report(broken, orphans, fm_issues, missing, latex_results, latex_fixes)
+        report = build_json_report(broken, orphans, fm_issues, missing, latex_results, latex_fixes, index_issues)
         print(json.dumps(report, indent=2, ensure_ascii=False))
     else:
-        print_report(broken, orphans, fm_issues, missing, latex_results, latex_fixes)
+        print_report(broken, orphans, fm_issues, missing, latex_results, latex_fixes, index_issues)
 
     # Exit code: non-zero if any issues found
     has_issues = bool(broken or orphans or fm_issues or missing)
+    if index_issues is not None:
+        has_issues = has_issues or bool(index_issues["missing_from_index"] or index_issues["dangling_in_index"])
     return 1 if has_issues else 0
 
 
