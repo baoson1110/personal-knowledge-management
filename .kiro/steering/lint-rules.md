@@ -6,6 +6,16 @@ inclusion: manual
 
 Rules and procedures for running wiki health checks. Activate this steering file when the user issues a `lint` or `web-impute:` command.
 
+## Available Tools
+
+Before running ad-hoc shell commands, use the dedicated lint tools:
+
+- **`python3 tools/wiki_lint.py`** — Checks 1-4 and 10: broken links, orphans, missing frontmatter, missing concepts, LaTeX formatting. Supports `--fix` (auto-fix LaTeX), `--check <name>` (single check), `--json` (machine-readable output).
+- **`python3 tools/wiki_lint.py --fix`** — Same as above but auto-fixes LaTeX issues.
+- **`python3 tools/analyze-wiki.py --all`** — Checks 5-9: topic synthesis, domain MOC readiness, duplicates, cross-linking gaps, tag registry violations.
+
+Run both tools for a complete lint pass. The wiki_lint tool handles content-level checks; analyze-wiki handles structural/relational checks.
+
 ## Lint Checks
 
 When the user issues a `lint` command, scan the entire `wiki/` directory and check for the following issues:
@@ -35,10 +45,36 @@ When the user issues a `lint` command, scan the entire `wiki/` directory and che
 - If a referenced concept does not have a corresponding file in `wiki/concepts/`, flag it as a missing concept.
 - Exclude references that resolve to files in `wiki/summaries/`, `wiki/topics/`, or `wiki/domains/` — only flag truly missing pages.
 
-### 5. Topic Opportunities
+### 5. Topic Synthesis
 
-- Run `python3 tools/analyze-wiki.py --topic-candidates` to detect concept clusters.
-- Report any cluster of 3+ concepts in the same domain that share overlapping tags but have no topic page connecting them.
+Lint should actively create topic files when overlap is strong, not just report suggestions.
+
+#### 5a — Detect Overlap
+
+1. Run `python3 tools/analyze-wiki.py --topic-candidates` to detect concept clusters.
+2. For each cluster found, check for **summary overlap**: scan summaries in the same domain for content that answers the same questions, explains the same processes, or covers the same techniques from different angles.
+
+#### 5b — Auto-Create Topics (Strong Overlap)
+
+A topic MUST be created when ALL of the following are true:
+
+- **2+ summaries** in the same domain discuss substantially overlapping content.
+- **3+ concepts** from those summaries are thematically related (overlapping tags or mutual backlinks).
+- No existing topic file already covers this cluster.
+
+When auto-creating:
+
+1. Create the file at `wiki/topics/<topic-slug>.md` with valid YAML frontmatter (all 7 required fields).
+2. Set `confidence: high` and `source:` to the primary summary that anchors the cluster.
+3. The topic body MUST follow the Required Structure from wiki-conventions (Overview, Detailed Comparison or Narrative, Linked Pages, See Also).
+4. Include a Mermaid diagram or static image if the relationships or processes benefit from visual illustration.
+5. Update the linked concept files to add a backlink to the new topic in their "See Also" sections.
+
+#### 5c — Suggest Topics (Weaker Overlap)
+
+If overlap signals are present but do not meet the auto-creation threshold (e.g. only 2 related concepts, or summaries overlap on a subtopic rather than a main theme):
+
+- Report as a suggestion in the lint summary: `Topic candidate: <topic-name>` — list the concepts and summaries it would connect.
 - Present these as suggestions, not errors.
 
 ### 6. Domain MOC Readiness
@@ -127,7 +163,8 @@ After all checks and fixes are complete, report a summary to the user:
 - **Orphan files found**: count and list of files with no inbound links.
 - **Missing frontmatter**: count and list of files with incomplete frontmatter.
 - **Missing concepts detected**: count and list of referenced concepts without files.
-- **Topic opportunities**: count and list of concept clusters that could become topic pages.
+- **Topics auto-created**: count and list of topic files created during the synthesis check, with the concepts and summaries they connect.
+- **Topic candidates**: count and list of weaker-overlap clusters suggested for user review.
 - **Domain MOC status**: domains ready for MOC creation (10+) and approaching threshold (8-9).
 - **Duplicate candidates**: count and list of concept pairs that may need merging.
 - **Cross-linking gaps**: count of weakly linked concepts and unlinked same-domain pairs.

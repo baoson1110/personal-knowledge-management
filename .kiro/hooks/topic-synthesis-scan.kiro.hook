@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Topic Synthesis Scan",
+  "description": "On-demand full topic synthesis scan. Click to check all wiki domains for topic creation or update opportunities.",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Run a full topic synthesis scan across the entire wiki:\n\n1. Run `python3 tools/analyze-wiki.py --topic-candidates` to detect concept clusters.\n2. For each cluster found, check for summary overlap: scan summaries in the same domain for content that answers the same questions, explains the same processes, or covers the same techniques from different angles.\n3. For clusters that meet the auto-creation threshold (2+ overlapping summaries, 3+ related concepts, no existing topic covering it):\n   - Auto-create the topic file at `wiki/topics/<topic-slug>.md` following wiki-conventions (Overview, Detailed Comparison or Narrative, Linked Pages, See Also).\n   - Include a Mermaid diagram if the relationships benefit from visual illustration.\n   - Update linked concept files with backlinks to the new topic.\n   - Update wiki/index.md.\n4. For clusters below threshold, report as suggestions: \"Topic candidate: <name> — connects <concepts>. Want me to create it?\"\n5. Also check existing topic files: read each topic in `wiki/topics/` and check if new summaries or concepts have been added since the topic was last updated. If so, suggest updating the topic with the new content.\n6. Report a summary: topics created, topics that need updating, and topic candidates for user review."
+  }
+}

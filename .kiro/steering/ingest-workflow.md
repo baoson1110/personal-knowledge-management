@@ -87,15 +87,53 @@ After creating or updating concepts, perform a cross-linking pass:
 3. If no link exists, add a `[[backlink]]` in the "See Also" section of both concept files (bidirectional linking).
 4. Do NOT add links that are semantically irrelevant — only link concepts that a reader would benefit from navigating between.
 
-## Step 5 — Check for Topic Emergence
+## Step 5 — Synthesis Pass (Topic Creation & Update)
 
-After concept creation and cross-linking, check if a new topic page should be suggested:
+After concept creation and cross-linking, actively synthesize overlapping content into topic pages.
 
-1. Run `python3 tools/analyze-wiki.py --topic-candidates` to identify concept clusters.
-2. A topic candidate exists when **3+ concepts** share the same domain AND are thematically related (overlapping tags or mutual backlinks) AND no existing topic file already covers this cluster.
-3. If a topic candidate is found, include it in the Post-Flight report as a suggestion:
-   - `Topic candidate: <topic-name>` — list the concepts it would connect.
-4. Do NOT auto-create topic files during ingest. Present them as suggestions for the user to approve.
+### 5a — Detect Overlap Across Summaries
+
+1. Compare the new summary against all existing summaries in the same domain.
+2. Look for **content overlap signals**:
+   - Two or more summaries answering the same question or explaining the same process.
+   - Two or more summaries covering the same technique from different angles (e.g. theory vs. practice, overview vs. deep-dive).
+   - Shared key terms, shared "Related Concepts" entries, or 2+ shared tags.
+3. Run `python3 tools/analyze-wiki.py --topic-candidates` to identify concept clusters.
+
+### 5b — Auto-Create Topic When Overlap Is Strong
+
+A topic MUST be created (not just suggested) when ALL of the following are true:
+
+- **2+ summaries** in the same domain discuss substantially overlapping content (same questions, same techniques, same comparisons).
+- **3+ concepts** from those summaries are thematically related (overlapping tags or mutual backlinks).
+- No existing topic file already covers this cluster.
+
+When auto-creating a topic:
+
+1. Create the file at `wiki/topics/<topic-slug>.md` with valid YAML frontmatter (all 7 required fields).
+2. Set `confidence: high` and `source:` to the primary raw file that triggered the synthesis.
+3. The topic body MUST include:
+   - A **synthesis narrative** that unifies the overlapping content — not just a list of links, but an explanation of how the concepts relate, where they agree, and where they differ.
+   - `[[backlinks]]` to all connected concept and summary files.
+   - A Mermaid diagram if the relationships or processes involved benefit from visual illustration.
+   - A "See Also" section linking to related topics or domains.
+4. Update the linked concept files to add a backlink to the new topic in their "See Also" sections.
+
+### 5c — Update Existing Topics
+
+If an existing topic file already covers the cluster but the new summary adds new perspectives or information:
+
+1. Update the topic file with the new insights.
+2. Add backlinks to the new summary and any new concepts.
+3. Update the `updated:` frontmatter field.
+
+### 5d — Suggest Topics When Overlap Is Weaker
+
+If the overlap signals are present but do not meet the auto-creation threshold (e.g. only 2 related concepts, or summaries overlap on a subtopic rather than a main theme):
+
+1. Include it in the Post-Flight report as a suggestion:
+   - `Topic candidate: <topic-name>` — list the concepts and summaries it would connect, and describe the overlapping theme.
+2. Ask the user if they want to create the topic now.
 
 ## Step 6 — Update the Domain MOC
 
@@ -135,6 +173,7 @@ Update `tools/.compile-manifest.json` with an entry for the compiled source:
 
 - Report a summary of what was created: number of concept files (new vs. updated), summary file path, whether the domain MOC was updated or created, and the key insight.
 - Report cross-links added: list any new bidirectional links created between concepts.
-- Report topic candidates: if the topic emergence check found candidates, list them with the concepts they would connect. Ask the user if they want to create any.
+- Report topics created: list any topic files auto-created during the synthesis pass, with the concepts and summaries they connect.
+- Report topic candidates: if the synthesis pass found weaker overlap that didn't meet the auto-creation threshold, list them with the concepts they would connect. Ask the user if they want to create any.
 - Report domain status: if any domain is approaching the 10-concept threshold (8+), mention it.
 - If any issues were encountered (e.g. ambiguous domain, overlapping concepts, potential duplicates), note them for the user.

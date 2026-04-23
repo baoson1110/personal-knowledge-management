@@ -142,6 +142,72 @@ Topic files aggregate and connect multiple concepts into a broader theme. They s
 - Must link to at least 2 concept files via `[[backlinks]]`
 - Should provide comparative analysis, selection guidance, or a unifying narrative across the linked concepts
 
+### Required Structure
+
+Every topic file MUST contain these sections:
+
+1. **Overview** — a synthesis narrative explaining the theme, how the connected concepts relate, where they agree, and where they differ. This is NOT a list of links — it is prose that adds value beyond what the individual concept files provide.
+2. **Detailed Comparison or Narrative** — deeper analysis: comparative tables, selection guides, trade-off discussions, or a unifying explanation depending on the topic type.
+3. **Linked Pages** — explicit `[[backlinks]]` to all connected concept, summary, and domain files.
+4. **See Also** — links to related topics or domains.
+
+## Mermaid Diagrams
+
+Wiki pages may use Mermaid diagrams to illustrate processes, relationships, or structures when the content benefits from visual representation. Mermaid diagrams and static images (from `asset/`) are equally valid ways to illustrate content — choose whichever fits the context best.
+
+### When to Use Mermaid
+
+Include a Mermaid diagram when the content describes something that is easier to understand visually than in prose — for example:
+
+- A multi-step process or pipeline
+- A request/response sequence between components
+- State transitions or lifecycle stages
+- Relationships or taxonomy between concepts
+- An architecture with interacting parts
+
+Do NOT add a Mermaid diagram just because a page exists. Only include one when it genuinely aids comprehension of the content.
+
+### Diagram Type Selection
+
+Choose the diagram type that best fits the content:
+
+| Content Type | Recommended Mermaid Diagram |
+|---|---|
+| Process, pipeline, workflow | `flowchart TD` or `flowchart LR` |
+| Temporal sequence, request/response | `sequenceDiagram` |
+| Lifecycle, state transitions | `stateDiagram-v2` |
+| Concept relationships, taxonomy | `flowchart TD` or `flowchart LR` |
+| Timeline, historical progression | `timeline` |
+| Class hierarchy, data model | `classDiagram` |
+
+### Formatting Rules
+
+- Wrap all Mermaid diagrams in a fenced code block with the `mermaid` language tag:
+
+````
+```mermaid
+flowchart LR
+    A[Raw Source] --> B[Summary]
+    B --> C[Concepts]
+    C --> D[Topics]
+```
+````
+
+- Every Mermaid diagram MUST have a caption on the line immediately below the closing fence, in italics:
+
+````
+```mermaid
+flowchart LR
+    A[Raw Source] --> B[Summary]
+```
+*Figure: The ingest pipeline from raw source to wiki pages.*
+````
+
+- Keep diagrams readable: prefer 5–15 nodes. If a diagram needs more, split it into multiple diagrams or simplify by grouping.
+- Use descriptive node labels, not abbreviations. `[Bellman Equation]` not `[BE]`.
+- Use subgraphs to group related nodes when the diagram has distinct clusters.
+- Prefer `flowchart` over `graph` for new diagrams (same syntax, more features).
+
 ## Index File
 
 - `wiki/index.md` — catalog of all wiki pages, each with a `[[link]]` and a one-line summary, organized by category (Concepts, Summaries, Topics, Domains)
