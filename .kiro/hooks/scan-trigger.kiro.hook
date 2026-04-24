@@ -7,6 +7,6 @@
   },
   "then": {
     "type": "askAgent",
-    "prompt": "Scan all files in raw/ and identify any uncompiled or modified raw sources by checking tools/.compile-manifest.json. For each uncompiled source, follow the ingest-workflow steering file (.kiro/steering/ingest-workflow.md) to compile it into the wiki. Report the status of each source (new, compiled, modified) and compile all pending sources."
+    "prompt": "Run `python3 tools/scan_sources.py --pending` to identify uncompiled or modified raw sources. If there are pending sources, follow the ingest-workflow steering file (.kiro/steering/ingest-workflow.md) to compile each one into the wiki. Report the final status."
   }
 }

@@ -9,9 +9,10 @@ Step-by-step procedure for compiling a raw source document into the wiki. This s
 
 ## Pre-Flight Check
 
-1. Read `tools/.compile-manifest.json` and look up the source path.
-2. If the source status is `compiled` and the file has not been modified since `compiled_at`, **skip** it. Report: "Already compiled — no changes detected." Do not proceed further.
-3. If the source status is `modified` (compiled but changed since), proceed with recompilation and note it is a re-ingest.
+1. Run `python3 tools/scan_sources.py --json --pending` to get the list of uncompiled/modified sources (handles macOS Unicode normalization automatically).
+2. Alternatively, read `tools/.compile-manifest.json` and look up the source path manually.
+3. If the source status is `compiled` and the file has not been modified since `compiled_at`, **skip** it. Report: "Already compiled — no changes detected." Do not proceed further.
+4. If the source status is `modified` (compiled but changed since), proceed with recompilation and note it is a re-ingest.
 
 ## Step 1 — Read the Raw Source
 
@@ -35,7 +36,7 @@ Create a single summary file at `wiki/summaries/<source-slug>.md` with:
 
 ## Step 3 — Extract Concepts
 
-Identify between **1 and 3** macro concepts from the source using the heuristics below.
+Identify between **1 and 5** macro concepts from the source using the heuristics below.
 
 ### Concept Identification Heuristics
 
