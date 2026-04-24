@@ -40,7 +40,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 WIKI_DIR = REPO_ROOT / "wiki"
 INDEX_PATH = WIKI_DIR / "index.md"
 TAGS_PATH = WIKI_DIR / "tags.yml"
-SUBDIRS = ["concepts", "summaries", "topics", "domains"]
+SUBDIRS = ["concepts", "summaries", "topics", "domains", "reference"]
 
 REQUIRED_FIELDS = ["title", "domain", "tags", "created", "updated", "source", "confidence"]
 

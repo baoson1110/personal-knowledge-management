@@ -116,6 +116,21 @@ Topic files may include images that help compare or connect the concepts they ag
 - Must include a `domain:` frontmatter field identifying the owning domain MOC
 - Filename is the concept slug: `<concept-slug>.md`
 
+## Reference Files (`wiki/reference/`)
+
+Reference files are code-heavy, syntax-oriented guides (keyword tables, API cheatsheets, configuration examples). They explain *how* with runnable examples, whereas concept files explain *what* and *why*.
+
+- Maximum **300 lines** per reference file
+- Must include valid YAML frontmatter with all 7 required fields
+- Must link to at least 1 related concept file via `[[backlinks]]`
+- Filename is the reference slug: `<reference-slug>.md`
+
+### Classification Rule — Concept vs Reference
+
+- If the content explains an **idea, principle, or architecture** → concept file (`wiki/concepts/`, 150 lines)
+- If the content is a **syntax guide, keyword reference, or configuration cookbook** with substantial code examples → reference file (`wiki/reference/`, 300 lines)
+- When in doubt, start as a concept. Promote to reference only when code blocks push past 150 lines and the code is essential (not decorative)
+
 ## Summary Files (`wiki/summaries/`)
 
 Every summary file MUST contain these four sections:
@@ -132,6 +147,7 @@ Topic files aggregate and connect multiple concepts into a broader theme. They s
 ### Classification Rule
 
 - If the content describes a **single atomic idea** → create a concept file in `wiki/concepts/`
+- If the content is a **syntax guide, keyword reference, or configuration cookbook** with substantial code examples → create a reference file in `wiki/reference/`
 - If the content **aggregates, compares, or connects multiple concepts** → create a topic file in `wiki/topics/`
 - **Never place wiki content files at the wiki root** — only `wiki/index.md` lives there
 
@@ -210,7 +226,7 @@ flowchart LR
 
 ## Index File
 
-- `wiki/index.md` — catalog of all wiki pages, each with a `[[link]]` and a one-line summary, organized by category (Concepts, Summaries, Topics, Domains)
+- `wiki/index.md` — catalog of all wiki pages, each with a `[[link]]` and a one-line summary, organized by category (Concepts, Summaries, Topics, Reference, Domains)
 - `wiki/index.md` MUST be updated after every ingest, file-back, or lint operation
 
 ## Domain Maps of Content (`wiki/domains/`)
