@@ -135,10 +135,17 @@ Reference files are code-heavy, syntax-oriented guides (keyword tables, API chea
 
 Every summary file MUST contain these four sections:
 
-1. **Executive Summary** — concise overview of the source
-2. **Deep Analysis** — detailed breakdown of key content
+1. **Executive Summary** — concise overview of the source, including the **context**: what problem or question the source is addressing, why the topic matters, and what motivated the author to write about it. The reader should understand not just *what* the source covers, but *why* it exists.
+2. **Deep Analysis** — detailed breakdown of key content. For each major sub-topic or section, include the **reasoning**: why this sub-topic is discussed, how it connects to the overall argument, and what problem it solves. Don't just state facts — explain the logic that links them. When the source presents a solution or recommendation, explain the problem that prompted it.
 3. **Key Insights** — the most important takeaways
 4. **Related Concepts** — list of related concept links using `[[backlink]]` syntax
+
+### Writing Guidance for Summaries
+
+- **Context before content**: Before diving into what the source says, establish *why* it says it. What gap in understanding does it fill? What practical scenario does it address?
+- **Reasoning chains over isolated facts**: When the source builds an argument across sections (e.g., "problem → naive solution → why it fails → better solution"), preserve that chain in the Deep Analysis. The reader should follow the same logical progression.
+- **Transitions between sub-topics**: When moving between sections in the Deep Analysis, briefly explain *why* the next topic follows from the previous one. This prevents the summary from reading like a disconnected list of facts.
+- **Preserve the "why" of recommendations**: If the source recommends approach A over approach B, explain the reasoning — what tradeoffs were considered, what failure modes are avoided. A recommendation without its rationale loses most of its value.
 
 ## Topic Files (`wiki/topics/`)
 

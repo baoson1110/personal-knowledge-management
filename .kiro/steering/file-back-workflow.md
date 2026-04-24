@@ -4,17 +4,34 @@ inclusion: manual
 
 # File-Back Workflow
 
-Procedure for folding insights from outputs (reports, notes) back into the wiki. Activate this steering file when the user issues a `file-back: <output-file>` command.
+Procedure for folding insights from outputs (reports, notes) or conversations back into the wiki. Activate this steering file when the user issues a `file-back: <output-file>` command or asks to file back a conversation.
 
 ## Pre-Flight Check
 
-1. Read `tools/.fileback-manifest.json` and look up the specified output file.
+1. Read `tools/.fileback-manifest.json` and look up the specified output file (or conversation key).
 2. If the output status is `filed`, report: "Already filed back — no action taken." Do NOT duplicate content in the wiki. Stop here.
 3. If the output is not in the manifest or status is `pending`, proceed with the file-back.
 
+## Step 0 — Create Raw Source (Conversation File-Backs)
+
+When filing back a **conversation** (no pre-existing output file), create a raw discussion file first. This ensures every wiki page has a traceable `source:` path.
+
+1. Summarize the conversation's key topics, questions, and answers into a structured markdown file.
+2. Save it at `raw/discussion/<Descriptive Topic Title>.md`.
+   - Use a descriptive title (e.g., `Cloud Run Deploy Source and WIF Discussion.md`).
+   - Structure the file with a heading per question/topic discussed (e.g., `## Q1: ...`, `## Q2: ...`).
+   - For each question, include a **"Why this question came up"** paragraph explaining the context, motivation, or confusion that prompted it. This preserves the reasoning chain and makes the raw file useful for future reference — not just the answer, but the thought process.
+   - Include the answer with enough detail to be self-contained (key explanations, code snippets, tables, commands).
+   - Add a **Context** section at the top describing the overall scenario or problem being explored.
+   - Do NOT include verbatim chat transcripts — restructure into a readable Q&A format.
+3. Use this raw file path as the `source:` value in any wiki pages created from this conversation.
+4. Use `conversation:<slug>-<YYYY-MM-DD>` as the manifest key (e.g., `conversation:cloud-run-deploy-source-wif-2026-04-24`).
+
+Skip this step when filing back an existing output file (reports, notes) — those already have a file path.
+
 ## Step 1 — Read the Output
 
-- Read the full contents of the specified output file (e.g. `outputs/reports/report-topic-2025-01-20.md`).
+- Read the full contents of the specified output file (e.g. `outputs/reports/report-topic-2025-01-20.md`) or the raw discussion file created in Step 0.
 - Identify the key insights, analyses, and connections presented in the output.
 
 ## Step 2 — Identify New Insights
@@ -44,7 +61,7 @@ For each new insight identified:
 2. **Create new concept files**: If the insight is a new concept, create a file at `wiki/concepts/<concept-slug>.md` with:
    - Valid YAML frontmatter with all 7 required fields.
    - `confidence: medium` (derived from a secondary source — the output).
-   - `source:` set to the output file path.
+   - `source:` set to the output file path or the raw discussion file created in Step 0.
    - At least one `[[backlink]]` to an existing wiki file.
    - Maximum 150 lines.
 
@@ -84,6 +101,7 @@ Update `tools/.fileback-manifest.json` with the filed output:
 
 Report a summary of what was filed back:
 
+- Raw discussion file created (if conversation file-back).
 - Number of existing wiki files updated.
 - Number of new concept files created.
 - List of all wiki files touched.

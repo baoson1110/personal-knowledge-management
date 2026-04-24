@@ -29,10 +29,11 @@ Create a single summary file at `wiki/summaries/<source-slug>.md` with:
 - Set `confidence: high` (content derives directly from a raw source).
 - Set `source:` to the raw file path (e.g. `raw/articles/my-article.md`).
 - The body MUST contain exactly these four sections:
-  1. **Executive Summary** — concise overview of the source.
-  2. **Deep Analysis** — detailed breakdown of key content. Embed key diagrams and figures from the source here, placed inline near the text that discusses them. Only include informative images (diagrams, charts, architecture figures) — skip decorative ones. Every image MUST have an italicized caption on the line below describing what it shows.
+  1. **Executive Summary** — concise overview of the source, including the **context**: what problem or question the source is addressing, why the topic matters, and what motivated the author to write about it.
+  2. **Deep Analysis** — detailed breakdown of key content. For each major sub-topic, include the **reasoning**: why this sub-topic is discussed, how it connects to the overall argument, and what problem it solves. When the source presents a solution or recommendation, explain the problem that prompted it. Embed key diagrams and figures from the source here, placed inline near the text that discusses them. Only include informative images (diagrams, charts, architecture figures) — skip decorative ones. Every image MUST have an italicized caption on the line below describing what it shows.
   3. **Key Insights** — the most important takeaways.
   4. **Related Concepts** — list of related concept links using `[[backlink]]` syntax.
+- Follow the **Writing Guidance for Summaries** in wiki-conventions: context before content, reasoning chains over isolated facts, transitions between sub-topics, and preserve the "why" of recommendations.
 
 ## Step 3 — Extract Concepts
 
