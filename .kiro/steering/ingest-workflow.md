@@ -14,6 +14,105 @@ Step-by-step procedure for compiling a raw source document into the wiki. This s
 3. If the source status is `compiled` and the file has not been modified since `compiled_at`, **skip** it. Report: "Already compiled — no changes detected." Do not proceed further.
 4. If the source status is `modified` (compiled but changed since), proceed with recompilation and note it is a re-ingest.
 
+### Multi-Part Source Detection
+
+After identifying the source path, check whether it is part of a **multi-part source** (e.g., a book, course, or multi-chapter guide):
+
+- A multi-part source is a **folder** under `raw/` (typically `raw/books/<Title>/`) containing **2 or more related `.md` files** that form a coherent whole (chapters, lectures, parts).
+- Detection signals: the source path points to a file inside a subfolder of `raw/books/`, or the folder contains files with sequential naming (e.g., `ch01-`, `ch02-`, `part-1-`, `lecture-01-`).
+- If the user asks to ingest a folder path (e.g., `raw/books/My Book/`), treat it as a multi-part source.
+- If the user asks to ingest a single file that lives inside a multi-part folder, ask: "This file is part of [Book Name] (N chapters). Ingest just this chapter, or the whole book?"
+
+**If the source IS a multi-part source**, follow the **Multi-Part Source Workflow** below instead of Steps 1–3. Then rejoin at Step 4.
+
+**If the source is a single file**, proceed with Steps 1–3 as normal.
+
+## Multi-Part Source Workflow
+
+This workflow replaces Steps 1–3 for books, courses, and other multi-chapter sources. It produces one summary per chapter plus one book-level overview, and extracts concepts per-chapter rather than per-book.
+
+### MP-1 — Inventory the Source
+
+1. List all `.md` files in the multi-part folder. Sort them in reading order (by filename prefix: `ch01`, `ch02`, etc.).
+2. Read each chapter file. For each chapter, note:
+   - Chapter number and title
+   - Line count (to gauge depth)
+   - Key topics covered
+   - Image references (`![[asset/...]]`)
+3. Group chapters into **thematic clusters** — sets of 2–4 chapters that cover closely related topics. This grouping guides topic creation later. Example: chapters on tools + concurrency form a "Tool System" cluster; chapters on sub-agents + fork agents + coordination form a "Multi-Agent" cluster.
+
+### MP-2 — Create Per-Chapter Summaries
+
+For **each chapter**, create a summary file at:
+
+```
+wiki/summaries/<book-slug>-<chapter-slug>.md
+```
+
+Example: `wiki/summaries/claude-code-ch05-agent-loop.md`
+
+Each per-chapter summary follows the same rules as Step 2 (Executive Summary, Deep Analysis, Key Insights, Related Concepts) with these adjustments:
+
+- Set `source:` to the **individual chapter file path** (e.g., `raw/books/Claude Code Design/ch05-agent-loop.md`).
+- The Executive Summary should briefly note the chapter's place in the larger book (e.g., "Chapter 5 of *Claude Code Design*, covering the core agent loop").
+- The Deep Analysis should be **thorough for that chapter** — this is the primary record of the chapter's content. Do not compress to make room for other chapters.
+- The Related Concepts section should link to concepts from other chapters in the same book, not just external concepts.
+
+### MP-3 — Create the Book-Level Overview Summary
+
+After all per-chapter summaries are created, create a **book-level overview** at:
+
+```
+wiki/summaries/<book-slug>.md
+```
+
+Example: `wiki/summaries/claude-code-design.md`
+
+This overview is a **synthesis**, not a concatenation. It MUST contain:
+
+1. **Executive Summary** — what the book is about, its central thesis, intended audience, and why it matters.
+2. **Chapter Map** — a brief description of each chapter (2–3 sentences each) with `[[backlinks]]` to the per-chapter summaries. This serves as a navigational table of contents.
+3. **Cross-Cutting Themes** — ideas that span multiple chapters (e.g., "prompt cache as architectural constraint" appears in ch04, ch09, ch17). Explain how these themes weave through the book.
+4. **Key Insights** — the book's most important takeaways, synthesized across all chapters.
+5. **Related Concepts** — links to all concept files extracted from the book.
+
+The overview should be **longer than a typical summary** — up to 200 lines is acceptable for a book with 10+ chapters.
+
+### MP-4 — Extract Concepts Per-Chapter
+
+For each chapter, extract **1–3 concepts** using the same heuristics as Step 3 (Concept Identification Heuristics, Deduplication Before Creation, Concept File Requirements).
+
+Key differences from single-source ingestion:
+
+- The **per-chapter cap is 1–3** (not 1–5), but applied to each chapter independently. For an 18-chapter book, this yields 18–54 concepts before deduplication.
+- **Cross-chapter deduplication is critical.** Multiple chapters may discuss the same concept (e.g., "prompt caching" in ch04 and ch09). Deduplicate aggressively: create the concept from the chapter that covers it most deeply, then enrich it with details from other chapters. Update the `source:` to point to the primary chapter and mention secondary chapters in the body.
+- Set `source:` on each concept to the **chapter file** that is the primary source for that concept.
+- After all chapters are processed, review the full concept list and merge any that overlap significantly. The final count should be **roughly 1–2 concepts per chapter on average** after deduplication.
+
+### MP-5 — Compile Manifest for Multi-Part Sources
+
+Each chapter gets its own entry in `tools/.compile-manifest.json`, with `wiki_files` listing only the files generated from that specific chapter:
+
+```json
+{
+  "raw/books/Book Name/ch01-intro.md": {
+    "status": "compiled",
+    "compiled_at": "<ISO timestamp>",
+    "key_insight": "<chapter-level insight>",
+    "wiki_files": [
+      "wiki/summaries/book-name-ch01-intro.md",
+      "wiki/concepts/concept-from-ch01.md"
+    ]
+  }
+}
+```
+
+The book-level overview summary is listed under the **first chapter's** manifest entry (or a synthetic entry keyed by the folder path).
+
+After MP-5, **rejoin the standard workflow at Step 4** (Cross-Link Related Concepts). Steps 4–8 run once across all chapters, not per-chapter.
+
+---
+
 ## Step 1 — Read the Raw Source
 
 - Read the full contents of the raw source file.
