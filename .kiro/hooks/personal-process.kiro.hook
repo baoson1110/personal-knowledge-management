@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Personal Notes Process",
+  "description": "Process all pending personal notes through the consolidation and synthesis pipeline.",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Run `python3 tools/scan_personal.py --pending --json` to identify unconsolidated or modified personal notes. Follow the personal-synthesis-workflow steering file (.kiro/steering/personal-synthesis-workflow.md) to process each pending note: Phase 1 consolidates notes into drafts, Phase 2 synthesizes related drafts into synthesis documents. Update `tools/.personal-manifest.json` after each step. Report the final status."
+  }
+}

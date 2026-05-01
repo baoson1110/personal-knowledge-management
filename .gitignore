@@ -7,6 +7,7 @@ llm-knowledge-base/
 __pycache__
 tools/.compile-manifest.json
 tools/.fileback-manifest.json
+tools/.personal-manifest.json
 staging/**
 !staging/**/
 !staging/**/.gitkeep
@@ -22,3 +23,12 @@ outputs/**
 asset/**
 !asset/**/
 !asset/**/.gitkeep
+personal/inbox/**
+!personal/inbox/**/
+!personal/inbox/**/.gitkeep
+personal/notes/**
+!personal/notes/**/
+!personal/notes/**/.gitkeep
+personal/synthesis/**
+!personal/synthesis/**/
+!personal/synthesis/**/.gitkeep
