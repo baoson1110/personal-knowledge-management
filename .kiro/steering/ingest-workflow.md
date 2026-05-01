@@ -118,7 +118,13 @@ After MP-5, **rejoin the standard workflow at Step 4** (Cross-Link Related Conce
 - Read the full contents of the raw source file.
 - Identify the document type (article, paper, repo README, image caption, etc.).
 - Note the file path — it becomes the `source:` frontmatter value for all generated wiki files.
-- **Inventory images**: Scan the source for image references (`![[asset/...]]`). For each image found, note its path and the surrounding context (section heading, caption text, nearby paragraph). This inventory will be used in Steps 2 and 3 to carry relevant images into wiki pages.
+- **Inventory images**: Scan the source for image references in both formats:
+  - Obsidian wikilinks: `![[asset/...]]`
+  - Standard markdown: `![alt](url)`
+  
+  For each image found, note its path and the surrounding context (section heading, caption text, nearby paragraph). This inventory will be used in Steps 2 and 3 to carry relevant images into wiki pages.
+  
+  **If images are external URLs** (`![](https://...)`): The images have not been localized by the Obsidian Local Images Plus plugin. Flag this to the user: "This source has N external images. Run the Local Images Plus plugin in Obsidian first to download them to `asset/`, then re-read the source." If the user cannot run the plugin, proceed without images but note in the summary that visual content is missing.
 
 ## Step 2 — Create the Summary File
 
@@ -129,7 +135,7 @@ Create a single summary file at `wiki/summaries/<source-slug>.md` with:
 - Set `source:` to the raw file path (e.g. `raw/articles/my-article.md`).
 - The body MUST contain exactly these four sections:
   1. **Executive Summary** — concise overview of the source, including the **context**: what problem or question the source is addressing, why the topic matters, and what motivated the author to write about it.
-  2. **Deep Analysis** — detailed breakdown of key content. For each major sub-topic, include the **reasoning**: why this sub-topic is discussed, how it connects to the overall argument, and what problem it solves. When the source presents a solution or recommendation, explain the problem that prompted it. Embed key diagrams and figures from the source here, placed inline near the text that discusses them. Only include informative images (diagrams, charts, architecture figures) — skip decorative ones. Every image MUST have an italicized caption on the line below describing what it shows.
+  2. **Deep Analysis** — detailed breakdown of key content. For each major sub-topic, include the **reasoning**: why this sub-topic is discussed, how it connects to the overall argument, and what problem it solves. When the source presents a solution or recommendation, explain the problem that prompted it. **Embed ALL informative diagrams and figures from the source** — architecture diagrams, data flow charts, comparison visualizations, ablation results, mathematical graphs. Only skip purely decorative images (photos for fun, promotional images, avatars). Place each image inline near the text that discusses it. Every image MUST have an italicized caption on the line below describing what it shows and why it matters.
   3. **Key Insights** — the most important takeaways.
   4. **Related Concepts** — list of related concept links using `[[backlink]]` syntax.
 - Follow the **Writing Guidance for Summaries** in wiki-conventions: context before content, reasoning chains over isolated facts, transitions between sub-topics, and preserve the "why" of recommendations.
@@ -163,7 +169,7 @@ Before creating any new concept file:
   - `confidence: high` and `source:` pointing to the raw file.
   - At most **150 lines**.
   - At least one `[[backlink]]` to an existing wiki file.
-  - Images from the source may be included if they are **closely related to the concept itself** (e.g., a defining diagram or core illustration). Prefer at most 1–2 images per concept file. Every image MUST have an italicized caption. If an image is only relevant to one source's framing, keep it in the summary instead.
+  - Images from the source may be included — up to **5 images** per concept file — when they are **closely related to the concept itself** (e.g., a defining diagram, a comparison chart, a process visualization). Prioritize: (1) defining diagrams, (2) comparison charts, (3) process/flow diagrams. Every image MUST have an italicized caption. If an image is only relevant to one source's framing, keep it in the summary instead.
 - Use lowercase hyphen-separated slugs for filenames.
 
 ### Tag Registry Compliance

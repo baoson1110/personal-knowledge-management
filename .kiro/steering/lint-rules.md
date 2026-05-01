@@ -10,8 +10,10 @@ Rules and procedures for running wiki health checks. Activate this steering file
 
 Before running ad-hoc shell commands, use the dedicated lint tools:
 
-- **`python3 tools/wiki_lint.py`** — Checks 1-4 and 10: broken links, orphans, missing frontmatter, missing concepts, LaTeX formatting. Supports `--fix` (auto-fix LaTeX), `--check <name>` (single check), `--json` (machine-readable output).
+- **`python3 tools/wiki_lint.py`** — Checks 1-4, 10-13: broken links, orphans, missing frontmatter, missing concepts, LaTeX formatting, index completeness, image coverage, unlocalized images. Supports `--fix` (auto-fix LaTeX), `--check <name>` (single check), `--json` (machine-readable output).
 - **`python3 tools/wiki_lint.py --fix`** — Same as above but auto-fixes LaTeX issues.
+- **`python3 tools/wiki_lint.py --check images`** — Image coverage only (check 12).
+- **`python3 tools/wiki_lint.py --check unlocalized`** — Unlocalized images only (check 13).
 - **`python3 tools/analyze-wiki.py --all`** — Checks 5-9: topic synthesis, domain MOC readiness, duplicates, cross-linking gaps, tag registry violations.
 
 Run both tools for a complete lint pass. The wiki_lint tool handles content-level checks; analyze-wiki handles structural/relational checks.
@@ -120,6 +122,40 @@ If overlap signals are present but do not meet the auto-creation threshold (e.g.
 - Report each file and the number of formulas converted.
 - **Exclusions**: Do not flag math symbols inside code blocks (`` ` `` or ``` ``` ```), or inside `[[backlink]]` syntax.
 
+### 12. Image Coverage
+
+Check that wiki summaries and concepts actively use images from their raw sources when available.
+
+#### 12a — Summary Missing Images (Error)
+
+- For each summary file, read its `source:` frontmatter to find the raw source.
+- Count `![[asset/...]]` image references in both the raw source and the summary.
+- If the raw source has images but the summary has **zero** → report as **ERROR** (missing visual content).
+- Skip sources with no `![[asset/...]]` images (text-only sources).
+
+#### 12b — Summary Low Coverage (Warning)
+
+- If the summary has images but covers **less than 50%** of the source's images → report as **WARNING** (partial coverage).
+- The percentage is calculated as `summary_images / source_images * 100`.
+
+#### 12c — Concept Missing Images (Suggestion)
+
+- For each concept file, if its primary source has **5 or more** images and the concept has **zero** → report as **SUGGESTION** (consider adding key diagrams).
+- Do not flag concepts whose sources have fewer than 5 images.
+
+**Auto-fix**: No — image placement requires editorial judgment about which images to include and where.
+
+### 13. Unlocalized Images
+
+Scan all raw source files for external image URLs (`![...](https://...)`) that have not been downloaded to `asset/` by the Obsidian Local Images Plus plugin.
+
+- Scan all `.md` files under `raw/` for markdown image syntax with `http://` or `https://` URLs.
+- Exclude matches inside code blocks.
+- Report each file with the count of external URLs.
+- **Action**: Run the Obsidian Local Images Plus plugin on flagged files to download images to `asset/` and rewrite references.
+
+**Auto-fix**: No — requires running the Obsidian plugin interactively.
+
 ## Skeleton Creation Rules
 
 When lint identifies missing concept files:
@@ -171,6 +207,10 @@ After all checks and fixes are complete, report a summary to the user:
 - **Tag alias violations**: count and list of tags auto-fixed to their canonical form.
 - **Unregistered tags**: count and list of tags not in `wiki/tags.yml`, with affected files.
 - **LaTeX formatting fixes**: count and list of files where plain-text formulas were converted to LaTeX.
+- **Image coverage errors**: count and list of summaries with zero images despite source having images.
+- **Image coverage warnings**: count and list of summaries with less than 50% image coverage.
+- **Image coverage suggestions**: count and list of concepts with no images whose source has 5+ images.
+- **Unlocalized images**: count and list of raw sources with external image URLs not yet downloaded to `asset/`.
 - **Skeleton concepts created**: count and list of new skeleton files created (up to 5).
 - **Links fixed**: count of any links that were corrected.
 - **Index updated**: confirmation that the index was refreshed.

@@ -99,15 +99,34 @@ Wiki pages may embed images from the `asset/` folder when the source material co
 
 ### Summary Files
 
-Summary files should include all key diagrams and figures from the source. Since summaries are the primary record of a source document, preserving its visual content is important. Embed images in the Deep Analysis section where they support the narrative.
+Summary files MUST include **all informative diagrams and figures** from the source — architecture diagrams, data flow charts, comparison tables rendered as images, ablation results, mathematical visualizations, and any figure that aids comprehension of the content. The only images to exclude are purely decorative ones (photos for fun, promotional images, author avatars, product screenshots that don't convey technical content).
+
+Since summaries are the primary record of a source document, **preserving its visual content is as important as preserving its textual content**. A summary without the source's key diagrams loses significant explanatory value, especially for engineering-heavy or architecture-focused content where the visuals carry information that prose alone cannot convey.
+
+Embed images in the Deep Analysis section where they support the narrative. Place each image immediately after the paragraph that discusses it, with a caption that describes what the image shows and why it matters.
 
 ### Concept Files
 
-Concept files may include images only when the image is **closely related to the concept itself** — e.g., a diagram that defines or illustrates the core idea. Since concept files aggregate knowledge from multiple sources and have a 150-line limit, be selective: prefer at most 1–2 images per concept file. If an image is only relevant to one source's framing of the concept, it belongs in the summary, not the concept page.
+Concept files may include up to **5 images** when the images are **closely related to the concept itself** — e.g., a diagram that defines the core idea, a comparison chart between variants, or a visualization of the concept's key mechanism. Since concept files aggregate knowledge from multiple sources, prefer images that are canonical or widely applicable rather than specific to one source's framing.
+
+Selection priority for concept images:
+1. **Defining diagrams** — images that visually define the concept (e.g., an architecture diagram for an attention mechanism)
+2. **Comparison charts** — images that compare the concept against alternatives (e.g., KV cache savings across attention variants)
+3. **Process/flow diagrams** — images that show how the concept works step by step
+
+If an image is only relevant to one source's framing of the concept and doesn't generalize, it belongs in the summary, not the concept page.
 
 ### Topic Files
 
-Topic files may include images that help compare or connect the concepts they aggregate. Comparative diagrams or overview figures are good candidates.
+Topic files SHOULD proactively reuse images from their linked concept files, summary files, or raw sources to enhance readability. Topics aggregate and compare multiple concepts — visual aids are especially valuable here because they help the reader see relationships and tradeoffs that prose alone makes abstract.
+
+Good candidates for topic images:
+- **Comparative diagrams** from summaries that show how the connected concepts differ
+- **Architecture overviews** from concept files that illustrate the broader theme
+- **Data visualizations** (ablation results, benchmark comparisons, memory/performance charts) that support the topic's selection guidance or tradeoff analysis
+- **Process diagrams** from raw sources that show how the concepts interact in practice
+
+Do NOT duplicate every image from every linked concept — select the 3–5 most impactful images that support the topic's synthesis narrative. Every image must earn its place by adding visual information that the surrounding text references.
 
 ## Concept Files (`wiki/concepts/`)
 

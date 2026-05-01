@@ -14,6 +14,8 @@ Covers all lint checks defined in .kiro/steering/lint-rules.md:
   9. Tag registry violations (delegates to analyze-wiki.py)
  10. LaTeX formula formatting (audit + auto-fix)
  11. Index completeness (files missing from index, dangling index refs)
+ 12. Image coverage (summaries/concepts missing images from source)
+ 13. Unlocalized images (raw sources with external URLs not downloaded)
 
 Usage:
   python3 tools/wiki_lint.py                  # Full audit (report only)
@@ -22,6 +24,8 @@ Usage:
   python3 tools/wiki_lint.py --check latex    # LaTeX audit only
   python3 tools/wiki_lint.py --check latex --fix  # LaTeX audit + fix
   python3 tools/wiki_lint.py --check index    # Index completeness only
+  python3 tools/wiki_lint.py --check images   # Image coverage only
+  python3 tools/wiki_lint.py --check unlocalized  # Unlocalized images only
   python3 tools/wiki_lint.py --json           # Machine-readable output
 """
 
@@ -45,6 +49,10 @@ SUBDIRS = ["concepts", "summaries", "topics", "domains", "reference"]
 REQUIRED_FIELDS = ["title", "domain", "tags", "created", "updated", "source", "confidence"]
 
 _BACKLINK_RE = re.compile(r"\[\[([a-zA-Z0-9_-]+)\]\]")
+
+# Image reference patterns
+_ASSET_IMAGE_RE = re.compile(r"!\[\[asset/([^\]]+)\]\]")
+_EXTERNAL_IMAGE_RE = re.compile(r"!\[[^\]]*\]\(https?://[^)]+\)")
 
 
 # ── Unicode math characters that are ALWAYS mathematical ─────────────────────
@@ -403,6 +411,127 @@ def check_index_completeness(files: list[dict]) -> dict[str, list[str]]:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# CHECK 12 — Image Coverage
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _count_asset_images(text: str) -> int:
+    """Count ![[asset/...]] image references in text, excluding code blocks."""
+    no_code = re.sub(r"```.*?```", "", text, flags=re.DOTALL)
+    no_code = re.sub(r"`[^`]+`", "", no_code)
+    return len(_ASSET_IMAGE_RE.findall(no_code))
+
+
+def _read_source_file(source_path: str) -> str | None:
+    """Read a raw source file given its path from frontmatter."""
+    fpath = REPO_ROOT / source_path
+    if not fpath.is_file():
+        return None
+    try:
+        return fpath.read_text(encoding="utf-8")
+    except OSError:
+        return None
+
+
+def check_image_coverage(files: list[dict]) -> dict[str, list[dict]]:
+    """Check that wiki files use images from their source when available.
+
+    Returns {
+        "summary_missing": [{path, source, source_images, wiki_images}],
+        "summary_low": [{path, source, source_images, wiki_images, pct}],
+        "concept_missing": [{path, source, source_images}],
+    }
+    """
+    summary_missing: list[dict] = []
+    summary_low: list[dict] = []
+    concept_missing: list[dict] = []
+
+    for f in files:
+        fm = f["frontmatter"]
+        source_path = fm.get("source", "")
+        if not source_path or not source_path.startswith("raw/"):
+            continue
+
+        source_text = _read_source_file(source_path)
+        if source_text is None:
+            continue
+
+        source_images = _count_asset_images(source_text)
+        if source_images == 0:
+            continue
+
+        wiki_images = _count_asset_images(f["content"])
+
+        if f["subdir"] == "summaries":
+            if wiki_images == 0:
+                summary_missing.append({
+                    "path": f["path"],
+                    "source": source_path,
+                    "source_images": source_images,
+                    "wiki_images": 0,
+                })
+            elif source_images > 0:
+                pct = round(wiki_images / source_images * 100)
+                if pct < 50:
+                    summary_low.append({
+                        "path": f["path"],
+                        "source": source_path,
+                        "source_images": source_images,
+                        "wiki_images": wiki_images,
+                        "pct": pct,
+                    })
+
+        elif f["subdir"] == "concepts":
+            if wiki_images == 0 and source_images >= 5:
+                concept_missing.append({
+                    "path": f["path"],
+                    "source": source_path,
+                    "source_images": source_images,
+                })
+
+    return {
+        "summary_missing": summary_missing,
+        "summary_low": summary_low,
+        "concept_missing": concept_missing,
+    }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CHECK 13 — Unlocalized Images
+# ══════════════════════════════════════════════════════════════════════════════
+
+def check_unlocalized_images() -> list[dict]:
+    """Scan raw sources for external image URLs not yet localized to asset/.
+
+    Returns list of {path, count} for raw files with external image URLs.
+    """
+    results: list[dict] = []
+    raw_dir = REPO_ROOT / "raw"
+    if not raw_dir.is_dir():
+        return results
+
+    for fpath in sorted(raw_dir.rglob("*.md")):
+        if fpath.name.startswith("."):
+            continue
+        try:
+            content = fpath.read_text(encoding="utf-8")
+        except OSError:
+            continue
+
+        # Strip code blocks to avoid false positives
+        no_code = re.sub(r"```.*?```", "", content, flags=re.DOTALL)
+        no_code = re.sub(r"`[^`]+`", "", no_code)
+
+        external_count = len(_EXTERNAL_IMAGE_RE.findall(no_code))
+        if external_count > 0:
+            results.append({
+                "path": str(fpath.relative_to(REPO_ROOT)),
+                "count": external_count,
+            })
+
+    return results
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # Reporting
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -414,6 +543,8 @@ def print_report(
     latex_audit: list[dict],
     latex_fixes: list[dict] | None,
     index_issues: dict[str, list[str]] | None = None,
+    image_coverage: dict[str, list[dict]] | None = None,
+    unlocalized: list[dict] | None = None,
 ) -> None:
     """Print a human-readable lint report."""
 
@@ -496,6 +627,47 @@ def print_report(
     else:
         print("  (skipped)")
 
+    _header("CHECK 12: Image Coverage")
+    if image_coverage is not None:
+        sm = image_coverage["summary_missing"]
+        sl = image_coverage["summary_low"]
+        cm = image_coverage["concept_missing"]
+        if sm:
+            print(f"  Summaries with NO images (source has images): {len(sm)}")
+            for item in sm:
+                print(f"    ERROR: {item['path']}")
+                print(f"      Source {item['source']} has {item['source_images']} images, summary has 0")
+        if sl:
+            print(f"  Summaries with LOW image coverage (<50%): {len(sl)}")
+            for item in sl:
+                print(f"    WARN: {item['path']}")
+                print(f"      Source has {item['source_images']} images, summary has {item['wiki_images']} ({item['pct']}%)")
+        if cm:
+            print(f"  Concepts with no images (source has 5+): {len(cm)}")
+            for item in cm:
+                print(f"    SUGGEST: {item['path']}")
+                print(f"      Source {item['source']} has {item['source_images']} images — consider adding key diagrams")
+        if not sm and not sl and not cm:
+            print("  ✓ All wiki files have adequate image coverage.")
+        print(f"  Total: {len(sm)} missing, {len(sl)} low, {len(cm)} suggestions")
+    else:
+        print("  (skipped)")
+
+    _header("CHECK 13: Unlocalized Images")
+    if unlocalized is not None:
+        if unlocalized:
+            total_ext = sum(u["count"] for u in unlocalized)
+            print(f"  Raw sources with external image URLs: {len(unlocalized)}")
+            for u in unlocalized:
+                print(f"    {u['path']}: {u['count']} external URL(s)")
+            print(f"  Total: {total_ext} external images across {len(unlocalized)} files")
+            print("  Action: Run Obsidian Local Images Plus plugin on these files")
+        else:
+            print("  ✓ All raw source images are localized to asset/.")
+        print(f"  Total: {sum(u['count'] for u in unlocalized) if unlocalized else 0}")
+    else:
+        print("  (skipped)")
+
     # ── Summary ──────────────────────────────────────────────────────────
     _header("SUMMARY")
     print(f"  Wiki files scanned:    {_file_count}")
@@ -510,6 +682,15 @@ def print_report(
     if index_issues is not None:
         print(f"  Index missing:         {len(index_issues['missing_from_index'])} files")
         print(f"  Index dangling:        {len(index_issues['dangling_in_index'])} refs")
+    if image_coverage is not None:
+        sm = image_coverage["summary_missing"]
+        sl = image_coverage["summary_low"]
+        cm = image_coverage["concept_missing"]
+        print(f"  Image missing:         {len(sm)} summaries")
+        print(f"  Image low coverage:    {len(sl)} summaries")
+        print(f"  Image suggestions:     {len(cm)} concepts")
+    if unlocalized is not None:
+        print(f"  Unlocalized images:    {sum(u['count'] for u in unlocalized)} across {len(unlocalized)} files")
     print()
     print("  Tip: Run `python3 tools/analyze-wiki.py --all` for structural")
     print("  checks (domains, topics, duplicates, cross-linking, tags).")
@@ -523,6 +704,8 @@ def build_json_report(
     latex_audit: list[dict],
     latex_fixes: list[dict] | None,
     index_issues: dict[str, list[str]] | None = None,
+    image_coverage: dict[str, list[dict]] | None = None,
+    unlocalized: list[dict] | None = None,
 ) -> dict:
     """Build a machine-readable JSON report."""
     report = {
@@ -540,6 +723,10 @@ def build_json_report(
     }
     if index_issues is not None:
         report["index_completeness"] = index_issues
+    if image_coverage is not None:
+        report["image_coverage"] = image_coverage
+    if unlocalized is not None:
+        report["unlocalized_images"] = unlocalized
     return report
 
 
@@ -551,7 +738,7 @@ _file_count: int = 0
 # CLI
 # ══════════════════════════════════════════════════════════════════════════════
 
-CHECKS = ["broken", "orphans", "frontmatter", "missing", "latex", "index"]
+CHECKS = ["broken", "orphans", "frontmatter", "missing", "latex", "index", "images", "unlocalized"]
 
 
 def main() -> int:
@@ -591,6 +778,8 @@ def main() -> int:
     missing = check_missing_concepts(files) if (run_all or target == "missing") else []
     latex_results = audit_latex(files) if (run_all or target == "latex") else []
     index_issues = check_index_completeness(files) if (run_all or target == "index") else None
+    image_coverage = check_image_coverage(files) if (run_all or target == "images") else None
+    unlocalized = check_unlocalized_images() if (run_all or target == "unlocalized") else None
 
     # Auto-fix if requested
     latex_fixes: list[dict] | None = None
@@ -599,15 +788,19 @@ def main() -> int:
 
     # Output
     if args.json_output:
-        report = build_json_report(broken, orphans, fm_issues, missing, latex_results, latex_fixes, index_issues)
+        report = build_json_report(broken, orphans, fm_issues, missing, latex_results, latex_fixes, index_issues, image_coverage, unlocalized)
         print(json.dumps(report, indent=2, ensure_ascii=False))
     else:
-        print_report(broken, orphans, fm_issues, missing, latex_results, latex_fixes, index_issues)
+        print_report(broken, orphans, fm_issues, missing, latex_results, latex_fixes, index_issues, image_coverage, unlocalized)
 
     # Exit code: non-zero if any issues found
     has_issues = bool(broken or orphans or fm_issues or missing)
     if index_issues is not None:
         has_issues = has_issues or bool(index_issues["missing_from_index"] or index_issues["dangling_in_index"])
+    if image_coverage is not None:
+        has_issues = has_issues or bool(image_coverage["summary_missing"])
+    if unlocalized is not None:
+        has_issues = has_issues or bool(unlocalized)
     return 1 if has_issues else 0
 
 
