@@ -26,8 +26,8 @@ REPO_ROOT = SCRIPT_DIR.parent
 WIKI_DIR = REPO_ROOT / "wiki"
 TAG_REGISTRY_PATH = WIKI_DIR / "tags.yml"
 
-DOMAIN_MOC_THRESHOLD = 10
-DOMAIN_MOC_WARNING_THRESHOLD = 8
+DOMAIN_MOC_THRESHOLD = 5
+DOMAIN_MOC_WARNING_THRESHOLD = 3
 TOPIC_CANDIDATE_MIN_CONCEPTS = 3
 DUPLICATE_TAG_OVERLAP_THRESHOLD = 3
 
@@ -348,7 +348,7 @@ def print_domain_status(domain_info: dict) -> None:
         if domain in domain_info["existing_mocs"]:
             moc_marker = " [MOC exists]"
         elif count >= DOMAIN_MOC_THRESHOLD:
-            moc_marker = " [MOC READY — 10+ concepts]"
+            moc_marker = " [MOC READY — 5+ concepts]"
         elif count >= DOMAIN_MOC_WARNING_THRESHOLD:
             moc_marker = f" [approaching MOC threshold: {count}/{DOMAIN_MOC_THRESHOLD}]"
         concepts_list = domain_info["domain_concepts"].get(domain, [])

@@ -10,11 +10,12 @@ Rules and procedures for running wiki health checks. Activate this steering file
 
 Before running ad-hoc shell commands, use the dedicated lint tools:
 
-- **`python3 tools/wiki_lint.py`** — Checks 1-4, 10-13: broken links, orphans, missing frontmatter, missing concepts, LaTeX formatting, index completeness, image coverage, unlocalized images. Supports `--fix` (auto-fix LaTeX), `--check <name>` (single check), `--json` (machine-readable output).
+- **`python3 tools/wiki_lint.py`** — Checks 1-4, 6, 10-13: broken links, orphans, missing frontmatter, missing concepts, **domain MOC readiness**, LaTeX formatting, index completeness, image coverage, unlocalized images. Supports `--fix` (auto-fix LaTeX), `--check <name>` (single check), `--json` (machine-readable output).
 - **`python3 tools/wiki_lint.py --fix`** — Same as above but auto-fixes LaTeX issues.
+- **`python3 tools/wiki_lint.py --check domains`** — Domain MOC readiness only (check 6).
 - **`python3 tools/wiki_lint.py --check images`** — Image coverage only (check 12).
 - **`python3 tools/wiki_lint.py --check unlocalized`** — Unlocalized images only (check 13).
-- **`python3 tools/analyze-wiki.py --all`** — Checks 5-9: topic synthesis, domain MOC readiness, duplicates, cross-linking gaps, tag registry violations.
+- **`python3 tools/analyze-wiki.py --all`** — Checks 5, 7-9: topic synthesis, duplicates, cross-linking gaps, tag registry violations.
 
 Run both tools for a complete lint pass. The wiki_lint tool handles content-level checks; analyze-wiki handles structural/relational checks.
 
@@ -81,9 +82,9 @@ If overlap signals are present but do not meet the auto-creation threshold (e.g.
 
 ### 6. Domain MOC Readiness
 
-- Run `python3 tools/analyze-wiki.py --domain-status` to check domain concept counts.
-- Report any domain with 10+ concepts that lacks a domain MOC file in `wiki/domains/`.
-- Report any domain with 8-9 concepts as "approaching threshold."
+- Run `python3 tools/wiki_lint.py --check domains` (or the full lint which includes this check).
+- Report any domain with **5+ concepts** that lacks a domain MOC file in `wiki/domains/`.
+- Report any domain with **3-4 concepts** as "approaching threshold."
 
 ### 7. Duplicate Concept Detection
 
@@ -201,7 +202,7 @@ After all checks and fixes are complete, report a summary to the user:
 - **Missing concepts detected**: count and list of referenced concepts without files.
 - **Topics auto-created**: count and list of topic files created during the synthesis check, with the concepts and summaries they connect.
 - **Topic candidates**: count and list of weaker-overlap clusters suggested for user review.
-- **Domain MOC status**: domains ready for MOC creation (10+) and approaching threshold (8-9).
+- **Domain MOC status**: domains ready for MOC creation (5+) and approaching threshold (3-4).
 - **Duplicate candidates**: count and list of concept pairs that may need merging.
 - **Cross-linking gaps**: count of weakly linked concepts and unlinked same-domain pairs.
 - **Tag alias violations**: count and list of tags auto-fixed to their canonical form.

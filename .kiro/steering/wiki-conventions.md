@@ -263,4 +263,4 @@ Domain MOC files MUST contain:
 - List of related topic files
 - Bridge notes to other domains
 
-A domain MOC is created when 10+ concept files share the same `domain:` value.
+A domain MOC is created when **5+** concept files share the same `domain:` value.

@@ -70,8 +70,8 @@ For each new insight identified:
 1. For each concept created or updated, run the cross-linking pass:
    - Check for other concepts with the same domain or overlapping tags.
    - Add bidirectional `[[backlinks]]` where semantically relevant links are missing.
-2. Run `python3 tools/analyze-wiki.py --domain-status` to check if any domain now qualifies for a MOC.
-3. If a domain has 10+ concepts and no MOC, create the domain MOC file.
+2. Run `python3 tools/wiki_lint.py --check domains` to check if any domain now qualifies for a MOC.
+3. If a domain has **5+ concepts** and no MOC, create the domain MOC file.
 
 ## Step 5 — Update Index
 

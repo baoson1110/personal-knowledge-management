@@ -8,7 +8,7 @@ Covers all lint checks defined in .kiro/steering/lint-rules.md:
   3. Missing frontmatter fields
   4. Missing concept files
   5. Topic synthesis (delegates to analyze-wiki.py)
-  6. Domain MOC readiness (delegates to analyze-wiki.py)
+  6. Domain MOC readiness (built-in check + analyze-wiki.py)
   7. Duplicate concept detection (delegates to analyze-wiki.py)
   8. Cross-linking gaps (delegates to analyze-wiki.py)
   9. Tag registry violations (delegates to analyze-wiki.py)
@@ -24,6 +24,7 @@ Usage:
   python3 tools/wiki_lint.py --check latex    # LaTeX audit only
   python3 tools/wiki_lint.py --check latex --fix  # LaTeX audit + fix
   python3 tools/wiki_lint.py --check index    # Index completeness only
+  python3 tools/wiki_lint.py --check domains  # Domain MOC readiness only
   python3 tools/wiki_lint.py --check images   # Image coverage only
   python3 tools/wiki_lint.py --check unlocalized  # Unlocalized images only
   python3 tools/wiki_lint.py --json           # Machine-readable output
@@ -47,6 +48,9 @@ TAGS_PATH = WIKI_DIR / "tags.yml"
 SUBDIRS = ["concepts", "summaries", "topics", "domains", "reference"]
 
 REQUIRED_FIELDS = ["title", "domain", "tags", "created", "updated", "source", "confidence"]
+
+DOMAIN_MOC_THRESHOLD = 5
+DOMAIN_MOC_WARNING_THRESHOLD = 3
 
 _BACKLINK_RE = re.compile(r"\[\[([a-zA-Z0-9_-]+)\]\]")
 
@@ -229,6 +233,57 @@ def check_missing_concepts(files: list[dict]) -> list[dict]:
         {"slug": slug, "references": count}
         for slug, count in ref_counts.most_common()
     ]
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CHECK 6 — Domain MOC Readiness
+# ══════════════════════════════════════════════════════════════════════════════
+
+def check_domain_moc(files: list[dict]) -> dict[str, Any]:
+    """Check domain concept counts and flag domains that need a MOC.
+
+    Returns {
+        "domain_counts": {domain: count},
+        "domain_concepts": {domain: [slugs]},
+        "moc_ready": [(domain, count, [slugs])],  -- 5+ concepts, no MOC
+        "moc_approaching": [(domain, count, [slugs])],  -- 3-4 concepts, no MOC
+        "existing_mocs": [slugs],
+    }
+    """
+    domain_counts: dict[str, int] = Counter()
+    domain_concepts: dict[str, list[str]] = defaultdict(list)
+
+    concepts = [f for f in files if f["subdir"] == "concepts"]
+    for c in concepts:
+        domain = c["frontmatter"].get("domain", "unknown")
+        domain_counts[domain] += 1
+        domain_concepts[domain].append(c["slug"])
+
+    # Check which domain MOCs already exist
+    domains_dir = WIKI_DIR / "domains"
+    existing_mocs: set[str] = set()
+    if domains_dir.is_dir():
+        for f in domains_dir.iterdir():
+            if f.suffix == ".md" and not f.name.startswith("."):
+                existing_mocs.add(f.stem)
+
+    moc_ready: list[tuple[str, int, list[str]]] = []
+    moc_approaching: list[tuple[str, int, list[str]]] = []
+    for domain, count in sorted(domain_counts.items(), key=lambda x: -x[1]):
+        if domain in existing_mocs:
+            continue
+        if count >= DOMAIN_MOC_THRESHOLD:
+            moc_ready.append((domain, count, domain_concepts[domain]))
+        elif count >= DOMAIN_MOC_WARNING_THRESHOLD:
+            moc_approaching.append((domain, count, domain_concepts[domain]))
+
+    return {
+        "domain_counts": dict(domain_counts),
+        "domain_concepts": dict(domain_concepts),
+        "moc_ready": moc_ready,
+        "moc_approaching": moc_approaching,
+        "existing_mocs": sorted(existing_mocs),
+    }
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -545,6 +600,7 @@ def print_report(
     index_issues: dict[str, list[str]] | None = None,
     image_coverage: dict[str, list[dict]] | None = None,
     unlocalized: list[dict] | None = None,
+    domain_moc: dict[str, Any] | None = None,
 ) -> None:
     """Print a human-readable lint report."""
 
@@ -584,6 +640,29 @@ def print_report(
     else:
         print("  ✓ No missing concept files.")
     print(f"  Total: {len(missing)}")
+
+    _header("CHECK 6: Domain MOC Readiness")
+    if domain_moc is not None:
+        ready = domain_moc["moc_ready"]
+        approaching = domain_moc["moc_approaching"]
+        existing = domain_moc["existing_mocs"]
+        if existing:
+            print(f"  Existing MOCs: {', '.join(existing)}")
+        if ready:
+            print(f"  ⚠ Domains READY for MOC creation (5+ concepts, no MOC): {len(ready)}")
+            for domain, count, slugs in ready:
+                print(f"    ACTION REQUIRED: {domain} ({count} concepts)")
+                for slug in slugs:
+                    print(f"      - {slug}")
+        if approaching:
+            print(f"  Domains approaching threshold (3-4 concepts): {len(approaching)}")
+            for domain, count, slugs in approaching:
+                print(f"    {domain} ({count} concepts)")
+        if not ready and not approaching:
+            print("  ✓ All qualifying domains have MOCs.")
+        print(f"  Total: {len(ready)} ready, {len(approaching)} approaching")
+    else:
+        print("  (skipped)")
 
     _header("CHECK 10: LaTeX Formatting")
     total_latex = sum(len(r["issues"]) for r in latex_audit)
@@ -675,6 +754,8 @@ def print_report(
     print(f"  Orphan files:          {len(orphans)}")
     print(f"  Missing frontmatter:   {len(fm_issues)} files")
     print(f"  Missing concepts:      {len(missing)}")
+    if domain_moc is not None:
+        print(f"  Domain MOCs needed:    {len(domain_moc['moc_ready'])} ready, {len(domain_moc['moc_approaching'])} approaching")
     print(f"  LaTeX issues:          {total_latex} across {len(latex_audit)} files")
     if latex_fixes is not None:
         total_fixed = sum(r["fixes"] for r in latex_fixes)
@@ -693,7 +774,7 @@ def print_report(
         print(f"  Unlocalized images:    {sum(u['count'] for u in unlocalized)} across {len(unlocalized)} files")
     print()
     print("  Tip: Run `python3 tools/analyze-wiki.py --all` for structural")
-    print("  checks (domains, topics, duplicates, cross-linking, tags).")
+    print("  checks (topics, duplicates, cross-linking, tags).")
 
 
 def build_json_report(
@@ -706,6 +787,7 @@ def build_json_report(
     index_issues: dict[str, list[str]] | None = None,
     image_coverage: dict[str, list[dict]] | None = None,
     unlocalized: list[dict] | None = None,
+    domain_moc: dict[str, Any] | None = None,
 ) -> dict:
     """Build a machine-readable JSON report."""
     report = {
@@ -721,6 +803,18 @@ def build_json_report(
         },
         "latex_fixes": latex_fixes,
     }
+    if domain_moc is not None:
+        report["domain_moc"] = {
+            "moc_ready": [
+                {"domain": d, "count": c, "concepts": s}
+                for d, c, s in domain_moc["moc_ready"]
+            ],
+            "moc_approaching": [
+                {"domain": d, "count": c, "concepts": s}
+                for d, c, s in domain_moc["moc_approaching"]
+            ],
+            "existing_mocs": domain_moc["existing_mocs"],
+        }
     if index_issues is not None:
         report["index_completeness"] = index_issues
     if image_coverage is not None:
@@ -738,7 +832,7 @@ _file_count: int = 0
 # CLI
 # ══════════════════════════════════════════════════════════════════════════════
 
-CHECKS = ["broken", "orphans", "frontmatter", "missing", "latex", "index", "images", "unlocalized"]
+CHECKS = ["broken", "orphans", "frontmatter", "missing", "domains", "latex", "index", "images", "unlocalized"]
 
 
 def main() -> int:
@@ -776,6 +870,7 @@ def main() -> int:
     orphans = check_orphans(files) if (run_all or target == "orphans") else []
     fm_issues = check_frontmatter(files) if (run_all or target == "frontmatter") else []
     missing = check_missing_concepts(files) if (run_all or target == "missing") else []
+    domain_moc = check_domain_moc(files) if (run_all or target == "domains") else None
     latex_results = audit_latex(files) if (run_all or target == "latex") else []
     index_issues = check_index_completeness(files) if (run_all or target == "index") else None
     image_coverage = check_image_coverage(files) if (run_all or target == "images") else None
@@ -788,13 +883,15 @@ def main() -> int:
 
     # Output
     if args.json_output:
-        report = build_json_report(broken, orphans, fm_issues, missing, latex_results, latex_fixes, index_issues, image_coverage, unlocalized)
+        report = build_json_report(broken, orphans, fm_issues, missing, latex_results, latex_fixes, index_issues, image_coverage, unlocalized, domain_moc)
         print(json.dumps(report, indent=2, ensure_ascii=False))
     else:
-        print_report(broken, orphans, fm_issues, missing, latex_results, latex_fixes, index_issues, image_coverage, unlocalized)
+        print_report(broken, orphans, fm_issues, missing, latex_results, latex_fixes, index_issues, image_coverage, unlocalized, domain_moc)
 
     # Exit code: non-zero if any issues found
     has_issues = bool(broken or orphans or fm_issues or missing)
+    if domain_moc is not None:
+        has_issues = has_issues or bool(domain_moc["moc_ready"])
     if index_issues is not None:
         has_issues = has_issues or bool(index_issues["missing_from_index"] or index_issues["dangling_in_index"])
     if image_coverage is not None:

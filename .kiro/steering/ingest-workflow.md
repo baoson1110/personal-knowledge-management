@@ -245,14 +245,16 @@ If the overlap signals are present but do not meet the auto-creation threshold (
 ## Step 6 — Update the Domain MOC
 
 - Determine the `domain:` value assigned to the new concept files.
-- Run `python3 tools/analyze-wiki.py --domain-status` to check concept counts per domain.
+- Run `python3 tools/wiki_lint.py --check domains` to check concept counts per domain.
 - If a domain MOC exists at `wiki/domains/<domain-slug>.md`, add links to the new summary and concept files in the appropriate sections.
-- If no domain MOC exists yet and there are now 10+ concept files sharing this domain, create one with:
+- If no domain MOC exists yet and there are now **5+ concept files** sharing this domain, **you MUST create one** with:
   - Domain overview
   - List of all concept files in the domain with `[[links]]`
   - List of related topic files
   - Bridge notes to other domains
-- If fewer than 10 concepts share the domain and no MOC exists, skip MOC creation.
+- If fewer than 5 concepts share the domain and no MOC exists, skip MOC creation but note the count in Post-Flight.
+
+**This step is NOT optional.** If the tool reports "ACTION REQUIRED", you MUST create the domain MOC before proceeding to Step 7. Do not defer this to a future lint run.
 
 ## Step 7 — Update Index
 
@@ -278,9 +280,16 @@ Update `tools/.compile-manifest.json` with an entry for the compiled source:
 
 ## Post-Flight
 
-- Report a summary of what was created: number of concept files (new vs. updated), summary file path, whether the domain MOC was updated or created, and the key insight.
-- Report cross-links added: list any new bidirectional links created between concepts.
-- Report topics created: list any topic files auto-created during the synthesis pass, with the concepts and summaries they connect.
-- Report topic candidates: if the synthesis pass found weaker overlap that didn't meet the auto-creation threshold, list them with the concepts they would connect. Ask the user if they want to create any.
-- Report domain status: if any domain is approaching the 10-concept threshold (8+), mention it.
+Report the following items. **Every item is mandatory** — do not skip any line even if the value is "none" or "0".
+
+- **Domain MOC status** (MUST be first line):
+  - If a domain MOC was created this ingest: `✅ Domain MOC CREATED: wiki/domains/<domain>.md (<N> concepts)`
+  - If a domain MOC was updated: `✅ Domain MOC UPDATED: wiki/domains/<domain>.md`
+  - If a domain crossed the 5-concept threshold but MOC was NOT created: `❌ BLOCKED: Domain <domain> has <N> concepts but no MOC — this should not happen, Step 6 was skipped`
+  - If no domain crossed the threshold: `Domain MOC: no new domains reached 5-concept threshold`
+  - If any domain is approaching the threshold (3-4 concepts): `⚠ Approaching: <domain> (<N>/5 concepts)`
+- **Files created**: number of concept files (new vs. updated), summary file path, and the key insight.
+- **Cross-links added**: list any new bidirectional links created between concepts.
+- **Topics created**: list any topic files auto-created during the synthesis pass, with the concepts and summaries they connect.
+- **Topic candidates**: if the synthesis pass found weaker overlap that didn't meet the auto-creation threshold, list them with the concepts they would connect. Ask the user if they want to create any.
 - If any issues were encountered (e.g. ambiguous domain, overlapping concepts, potential duplicates), note them for the user.
