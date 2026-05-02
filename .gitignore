@@ -3,6 +3,8 @@ vault/.obsidian/
 docs/
 graphify/
 .DS_store
+.venv/
+*.egg-info/
 llm-knowledge-base/
 __pycache__
 tools/.compile-manifest.json

@@ -1,0 +1,6 @@
+[project]
+name = "personal-wiki"
+version = "0.1.0"
+description = "A Kiro-orchestrated personal knowledge base"
+requires-python = ">=3.11"
+dependencies = []
