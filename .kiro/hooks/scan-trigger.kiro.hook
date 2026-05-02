@@ -1,12 +1,12 @@
 {
   "name": "Scan Trigger",
   "version": "1",
-  "description": "User-triggered hook to scan and compile all uncompiled raw sources.",
+  "description": "User-triggered hook to scan and compile all uncompiled staged sources.",
   "when": {
     "type": "userTriggered"
   },
   "then": {
     "type": "askAgent",
-    "prompt": "Run `python3 tools/scan_sources.py --pending` to identify uncompiled or modified raw sources. If there are pending sources, follow the ingest-workflow steering file (.kiro/steering/ingest-workflow.md) to compile each one into the wiki. Report the final status."
+    "prompt": "Run `python3 tools/scan_sources.py --pending` to identify uncompiled or modified staged sources. If there are pending sources, follow the ingest-workflow steering file (.kiro/steering/ingest-workflow.md) to compile each one into the wiki. Report the final status."
   }
 }

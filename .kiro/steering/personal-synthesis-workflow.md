@@ -9,20 +9,19 @@ Procedure for consolidating and synthesizing personal notes into refined documen
 ## Folder Structure
 
 ```
-personal/
+vault/life/
   inbox/        # raw personal input — brainstorms, conversations, plans, journal entries
   notes/        # consolidated per-item — cleaned up, structured, one note per inbox item
-  synthesis/    # cross-note synthesis — merges multiple notes on the same topic
 ```
 
-The pipeline flows: `inbox/ → notes/ → synthesis/`
+The pipeline flows: `inbox/ → notes/`
 
 - **inbox → notes** is a 1:1 cleanup (one messy inbox item produces one clean note)
-- **notes → synthesis** is a many:1 merge (multiple notes on the same topic produce one synthesis)
+- **notes → notes** is a many:1 merge (multiple notes on the same topic produce one synthesis note)
 
 ## Personal Note Conventions
 
-### Inbox Items (`personal/inbox/`)
+### Inbox Items (`vault/life/inbox/`)
 
 Inbox items are freeform. They can be:
 - Chat transcripts (e.g., brainstorming with an LLM)
@@ -42,9 +41,9 @@ updated: "YYYY-MM-DD"
 ---
 ```
 
-No `domain`, `confidence`, or `source` fields required. Tags are freeform and do NOT need to comply with `wiki/tags.yml`.
+No `domain`, `confidence`, or `source` fields required. Tags are freeform and do NOT need to comply with `vault/wiki/tags.yml`.
 
-### Notes (`personal/notes/`)
+### Notes (`vault/life/notes/`)
 
 Notes are cleaned-up, structured versions of individual inbox items. One note per source inbox item. They use this frontmatter:
 
@@ -54,13 +53,13 @@ title: "Human-readable title"
 tags: [tag1, tag2]
 created: "YYYY-MM-DD"
 updated: "YYYY-MM-DD"
-source: "personal/inbox/original-item.md"
+source: "vault/life/inbox/original-item.md"
 ---
 ```
 
 The `source` field points to the single inbox item this note was consolidated from.
 
-### Synthesis Documents (`personal/synthesis/`)
+### Synthesis Documents (`vault/life/notes/`)
 
 Synthesis documents are refined, structured outputs produced by merging multiple related notes. They use this frontmatter:
 
@@ -71,8 +70,8 @@ tags: [tag1, tag2]
 created: "YYYY-MM-DD"
 updated: "YYYY-MM-DD"
 sources:
-  - "personal/notes/note-a.md"
-  - "personal/notes/note-b.md"
+  - "vault/life/notes/note-a.md"
+  - "vault/life/notes/note-b.md"
 ---
 ```
 
@@ -82,11 +81,11 @@ The `sources` field lists all notes that contributed to the synthesis.
 
 ## Phase 1 — Consolidation (inbox → notes)
 
-Triggered when the user asks to consolidate a personal inbox item (e.g., "consolidate my gap year note", "clean up personal/inbox/gap-year-plan.md").
+Triggered when the user asks to consolidate a personal inbox item (e.g., "consolidate my gap year note", "clean up vault/life/inbox/gap-year-plan.md").
 
 ### Step 1.1 — Read the Raw Inbox Item
 
-1. Read the full contents of the item in `personal/inbox/`.
+1. Read the full contents of the item in `vault/life/inbox/`.
 2. Identify the document type: chat transcript, bullet brainstorm, journal entry, decision log, etc.
 3. Note the language used (Vietnamese, English, mixed) — the note should preserve the **original language** of the substantive content.
 
@@ -114,7 +113,7 @@ The note MUST contain these sections (skip any that have no content):
 
 ### Step 1.4 — Write the Note
 
-1. Create the note at `personal/notes/<item-slug>.md` (use the same slug as the source inbox item).
+1. Create the note at `vault/life/notes/<item-slug>.md` (use the same slug as the source inbox item).
 2. Set `source:` to the path of the original inbox item.
 3. The note should be **significantly shorter** than the raw inbox item — aim for 30-50% of the original length for chat transcripts, closer to 70-80% for already-structured items.
 4. Write in clear, direct prose. No conversational tone.
@@ -136,9 +135,9 @@ Triggered when the user asks to synthesize personal notes on a topic (e.g., "syn
 
 ### Step 2.1 — Identify Related Notes
 
-1. Scan `personal/notes/` for files related to the requested topic.
+1. Scan `vault/life/notes/` for files related to the requested topic.
 2. Use filename, tags, and content to determine relevance.
-3. If any relevant items in `personal/inbox/` do NOT have a corresponding note yet, flag them: "These inbox items haven't been consolidated yet: [list]. Consolidate them first, or proceed with available notes only?"
+3. If any relevant items in `vault/life/inbox/` do NOT have a corresponding note yet, flag them: "These inbox items haven't been consolidated yet: [list]. Consolidate them first, or proceed with available notes only?"
 4. List the identified notes and confirm with the user before proceeding.
 
 ### Step 2.2 — Read and Cross-Analyze
@@ -152,7 +151,7 @@ Triggered when the user asks to synthesize personal notes on a topic (e.g., "syn
 
 ### Step 2.3 — Produce the Synthesis Document
 
-Create or update a file at `personal/synthesis/<topic-slug>.md`.
+Create or update a file at `vault/life/notes/<topic-slug>.md`.
 
 The synthesis MUST contain these sections:
 
@@ -186,7 +185,7 @@ When re-synthesizing (new notes added since last synthesis):
 ## What Does NOT Happen
 
 - Personal items are NOT ingested into the wiki pipeline. No wiki summaries, no concept extraction, no compile manifest entries.
-- Personal tags do NOT need to exist in `wiki/tags.yml`.
+- Personal tags do NOT need to exist in `vault/wiki/tags.yml`.
 - No domain MOC tracking for personal content.
 
 ## Manifest Tracking
@@ -199,17 +198,17 @@ The personal pipeline uses its own manifest at `tools/.personal-manifest.json` t
 {
   "version": 1,
   "inbox": {
-    "personal/inbox/gap-year-plan.md": {
+    "vault/life/inbox/gap-year-plan.md": {
       "status": "consolidated",
       "consolidated_at": "2026-05-02T12:00:00+00:00",
-      "note_file": "personal/notes/gap-year-plan.md"
+      "note_file": "vault/life/notes/gap-year-plan.md"
     }
   },
   "notes": {
-    "personal/notes/gap-year-plan.md": {
+    "vault/life/notes/gap-year-plan.md": {
       "status": "synthesized",
       "synthesized_at": "2026-05-02T13:00:00+00:00",
-      "synthesis_file": "personal/synthesis/gap-year.md"
+      "synthesis_file": "vault/life/notes/gap-year.md"
     }
   }
 }
@@ -223,7 +222,7 @@ After completing Phase 1 (consolidation) for an inbox item, update `tools/.perso
 {
   "status": "consolidated",
   "consolidated_at": "<ISO 8601 timestamp>",
-  "note_file": "personal/notes/<slug>.md"
+  "note_file": "vault/life/notes/<slug>.md"
 }
 ```
 
@@ -233,7 +232,7 @@ After completing Phase 2 (synthesis) for a note, update the notes section:
 {
   "status": "synthesized",
   "synthesized_at": "<ISO 8601 timestamp>",
-  "synthesis_file": "personal/synthesis/<topic-slug>.md"
+  "synthesis_file": "vault/life/notes/<topic-slug>.md"
 }
 ```
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""scan_personal.py — Scan personal/inbox/ and classify against the personal manifest.
+"""scan_personal.py — Scan vault/life/inbox/ and classify against the personal manifest.
 
 Tracks which inbox items have been consolidated (inbox → notes) and which
 notes have been included in a synthesis (notes → synthesis).
@@ -22,8 +22,8 @@ from pathlib import Path
 
 # ── Paths ────────────────────────────────────────────────────────────────────
 REPO_ROOT = Path(__file__).resolve().parent.parent
-INBOX_DIR = REPO_ROOT / "personal" / "inbox"
-NOTES_DIR = REPO_ROOT / "personal" / "notes"
+INBOX_DIR = REPO_ROOT / "vault" / "life" / "inbox"
+NOTES_DIR = REPO_ROOT / "vault" / "life" / "notes"
 MANIFEST_PATH = REPO_ROOT / "tools" / ".personal-manifest.json"
 
 SKIP_NAMES = {".gitkeep", ".DS_Store"}

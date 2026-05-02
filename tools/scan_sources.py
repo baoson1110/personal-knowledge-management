@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""scan_sources.py — Scan raw/ and classify sources against the compile manifest.
+"""scan_sources.py — Scan vault/staging/ and classify sources against the compile manifest.
 
 Handles macOS Unicode normalization (NFD filesystem vs NFC manifest keys)
 and non-breaking space mismatches. Uses manifest_ops for manifest loading.
@@ -20,7 +20,7 @@ from pathlib import Path
 
 # ── Paths ────────────────────────────────────────────────────────────────────
 REPO_ROOT = Path(__file__).resolve().parent.parent
-RAW_DIR = REPO_ROOT / "raw"
+RAW_DIR = REPO_ROOT / "vault" / "staging"
 MANIFEST_PATH = REPO_ROOT / "tools" / ".compile-manifest.json"
 
 # Allow importing manifest_ops from the same directory
@@ -58,7 +58,7 @@ SKIP_SUFFIXES = {".pdf", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"}
 
 
 def collect_raw_files() -> list[str]:
-    """Collect all raw source files, returning paths relative to REPO_ROOT."""
+    """Collect all staging source files, returning paths relative to REPO_ROOT."""
     files: list[str] = []
     for p in sorted(RAW_DIR.rglob("*")):
         if not p.is_file():
@@ -117,7 +117,7 @@ def classify_with_normalization(
 
 
 def scan_all() -> list[dict]:
-    """Scan all raw sources and return classification results.
+    """Scan all staging sources and return classification results.
 
     Returns a list of dicts with keys: path, status, words.
     """
@@ -162,7 +162,7 @@ def print_table(results: list[dict], pending_only: bool = False) -> None:
         total_counts[r["status"]] = total_counts.get(r["status"], 0) + 1
 
     if not results:
-        print("No pending sources found. All raw files are compiled.")
+        print("No pending sources found. All staging files are compiled.")
         print(f"\nTotal: {len(all_results)} source(s) — "
               f"{total_counts['compiled']} compiled, "
               f"{total_counts['new']} new, "
@@ -200,7 +200,7 @@ def print_json(results: list[dict], pending_only: bool = False) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(
         prog="scan_sources.py",
-        description="Scan raw/ sources and classify against the compile manifest.",
+        description="Scan vault/staging/ sources and classify against the compile manifest.",
     )
     parser.add_argument(
         "--json", action="store_true", dest="json_output",

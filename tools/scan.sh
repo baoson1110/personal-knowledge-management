@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# scan.sh — List raw sources with word counts and compile status.
+# scan.sh — List staging sources with word counts and compile status.
 # Usage: tools/scan.sh [--help]
 #
-# Reads all files in raw/ (excluding .gitkeep), shows each file's
+# Reads all files in vault/staging/ (excluding .gitkeep), shows each file's
 # word count and compile status (new / compiled / modified).
 # Status is determined by comparing against tools/.compile-manifest.json.
 
@@ -10,7 +10,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-RAW_DIR="$REPO_ROOT/raw"
+RAW_DIR="$REPO_ROOT/vault/staging"
 MANIFEST="$SCRIPT_DIR/.compile-manifest.json"
 
 # ── help ────────────────────────────────────────────────────────────
@@ -18,9 +18,9 @@ usage() {
   cat <<'EOF'
 Usage: tools/scan.sh [--help]
 
-Scan raw/ sources and report compile status.
+Scan vault/staging/ sources and report compile status.
 
-For each file in raw/ (excluding .gitkeep):
+For each file in vault/staging/ (excluding .gitkeep):
   - file path (relative to repo root)
   - word count
   - status: new | compiled | modified
@@ -46,7 +46,7 @@ fi
 
 # ── pre-flight checks ──────────────────────────────────────────────
 if [[ ! -d "$RAW_DIR" ]]; then
-  echo "Error: raw/ directory not found at $RAW_DIR" >&2
+  echo "Error: vault/staging/ directory not found at $RAW_DIR" >&2
   exit 1
 fi
 
@@ -69,7 +69,7 @@ while IFS= read -r f; do
 done < <(find "$RAW_DIR" -type f ! -name '.gitkeep' | sort)
 
 if [[ ${#FILES[@]} -eq 0 ]]; then
-  echo "No source files found in raw/"
+  echo "No source files found in vault/staging/"
   exit 0
 fi
 

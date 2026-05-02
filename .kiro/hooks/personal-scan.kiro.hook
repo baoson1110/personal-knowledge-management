@@ -1,7 +1,7 @@
 {
   "enabled": true,
   "name": "Personal Notes Scan",
-  "description": "Scan personal/notes/ and personal/drafts/ to identify items that need consolidation or synthesis.",
+  "description": "Scan vault/life/notes/ to identify items that need consolidation or synthesis.",
   "version": "1",
   "when": {
     "type": "userTriggered"

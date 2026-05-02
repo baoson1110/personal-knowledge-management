@@ -1,34 +1,34 @@
 #!/usr/bin/env bash
-# promote.sh — Move files from staging/ to the corresponding raw/ subdirectory.
-# Usage: tools/promote.sh [--help] [--all] [<staging-path>]
+# promote.sh — Move files from vault/inbox/ to the corresponding vault/staging/ subdirectory.
+# Usage: tools/promote.sh [--help] [--all] [<inbox-path>]
 #
-# Moves a file from staging/<subdir>/<filename> to raw/<subdir>/<filename>,
+# Moves a file from vault/inbox/<subdir>/<filename> to vault/staging/<subdir>/<filename>,
 # preserving the subdirectory structure. Aborts if the target already exists.
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-STAGING_DIR="$REPO_ROOT/staging"
-RAW_DIR="$REPO_ROOT/raw"
+INBOX_DIR="$REPO_ROOT/vault/inbox"
+STAGING_DIR="$REPO_ROOT/vault/staging"
 
 # ── help ────────────────────────────────────────────────────────────
 usage() {
   cat <<'EOF'
-Usage: tools/promote.sh [--help] [--all] [<staging-path>]
+Usage: tools/promote.sh [--help] [--all] [<inbox-path>]
 
-Move files from staging/ to the corresponding raw/ subdirectory.
+Move files from vault/inbox/ to the corresponding vault/staging/ subdirectory.
 
 Arguments:
-  <staging-path>  Path to a file under staging/ (e.g. staging/articles/my-doc.md)
+  <inbox-path>  Path to a file under vault/inbox/ (e.g. vault/inbox/articles/my-doc.md)
 
 Options:
-  --all     Move all files from staging/ to raw/ (excluding .gitkeep)
+  --all     Move all files from vault/inbox/ to vault/staging/ (excluding .gitkeep)
   --help    Show this help message and exit
 
 Behavior:
-  - Maps staging/<subdir>/<filename> to raw/<subdir>/<filename>
-  - Aborts with an error if the target file already exists in raw/
+  - Maps vault/inbox/<subdir>/<filename> to vault/staging/<subdir>/<filename>
+  - Aborts with an error if the target file already exists in vault/staging/
   - With --all, aborts on the first conflict (no partial moves)
 
 Exit codes:
@@ -43,13 +43,13 @@ if [[ "${1:-}" == "--help" ]]; then
 fi
 
 # ── pre-flight checks ──────────────────────────────────────────────
-if [[ ! -d "$STAGING_DIR" ]]; then
-  echo "Error: staging/ directory not found at $STAGING_DIR" >&2
+if [[ ! -d "$INBOX_DIR" ]]; then
+  echo "Error: vault/inbox/ directory not found at $INBOX_DIR" >&2
   exit 1
 fi
 
-if [[ ! -d "$RAW_DIR" ]]; then
-  echo "Error: raw/ directory not found at $RAW_DIR" >&2
+if [[ ! -d "$STAGING_DIR" ]]; then
+  echo "Error: vault/staging/ directory not found at $STAGING_DIR" >&2
   exit 1
 fi
 
@@ -66,14 +66,14 @@ promote_file() {
   # Get path relative to repo root
   local relpath="${src#"$REPO_ROOT"/}"
 
-  # Validate it's under staging/
-  if [[ "$relpath" != staging/* ]]; then
-    echo "Error: file is not under staging/: $relpath" >&2
+  # Validate it's under vault/inbox/
+  if [[ "$relpath" != vault/inbox/* ]]; then
+    echo "Error: file is not under vault/inbox/: $relpath" >&2
     return 1
   fi
 
-  # Map staging/... to raw/...
-  local target_rel="raw/${relpath#staging/}"
+  # Map vault/inbox/... to vault/staging/...
+  local target_rel="vault/staging/${relpath#vault/inbox/}"
   local target="$REPO_ROOT/$target_rel"
 
   # Check for conflict
@@ -97,17 +97,17 @@ if [[ "${1:-}" == "--all" ]]; then
   FILES=()
   while IFS= read -r f; do
     FILES+=("$f")
-  done < <(find "$STAGING_DIR" -type f ! -name '.gitkeep' | sort)
+  done < <(find "$INBOX_DIR" -type f ! -name '.gitkeep' | sort)
 
   if [[ ${#FILES[@]} -eq 0 ]]; then
-    echo "No files to promote in staging/"
+    echo "No files to promote in vault/inbox/"
     exit 0
   fi
 
   # Pre-check all targets for conflicts before moving anything
   for filepath in "${FILES[@]}"; do
     relpath="${filepath#"$REPO_ROOT"/}"
-    target_rel="raw/${relpath#staging/}"
+    target_rel="vault/staging/${relpath#vault/inbox/}"
     target="$REPO_ROOT/$target_rel"
     if [[ -f "$target" ]]; then
       echo "Error: target already exists: $target_rel (aborting --all)" >&2

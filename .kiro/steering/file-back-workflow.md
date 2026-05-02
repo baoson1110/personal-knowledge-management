@@ -17,37 +17,37 @@ Procedure for folding insights from outputs (reports, notes) or conversations ba
 When filing back a **conversation** (no pre-existing output file), create a raw discussion file first. This ensures every wiki page has a traceable `source:` path.
 
 1. Summarize the conversation's key topics, questions, and answers into a structured markdown file.
-2. Save it at `raw/discussion/<Descriptive Topic Title>.md`.
+2. Save it at `vault/staging/discussion/<Descriptive Topic Title>.md`.
    - Use a descriptive title (e.g., `Cloud Run Deploy Source and WIF Discussion.md`).
    - Structure the file with a heading per question/topic discussed (e.g., `## Q1: ...`, `## Q2: ...`).
    - For each question, include a **"Why this question came up"** paragraph explaining the context, motivation, or confusion that prompted it. This preserves the reasoning chain and makes the raw file useful for future reference — not just the answer, but the thought process.
    - Include the answer with enough detail to be self-contained (key explanations, code snippets, tables, commands).
    - Add a **Context** section at the top describing the overall scenario or problem being explored.
    - Do NOT include verbatim chat transcripts — restructure into a readable Q&A format.
-3. Use this raw file path as the `source:` value in any wiki pages created from this conversation.
+3. Use this staging file path as the `source:` value in any wiki pages created from this conversation.
 4. Use `conversation:<slug>-<YYYY-MM-DD>` as the manifest key (e.g., `conversation:cloud-run-deploy-source-wif-2026-04-24`).
 
 Skip this step when filing back an existing output file (reports, notes) — those already have a file path.
 
 ## Step 1 — Read the Output
 
-- Read the full contents of the specified output file (e.g. `outputs/reports/report-topic-2025-01-20.md`) or the raw discussion file created in Step 0.
+- Read the full contents of the specified output file (e.g. `vault/outputs/reports/report-topic-2025-01-20.md`) or the staging discussion file created in Step 0.
 - Identify the key insights, analyses, and connections presented in the output.
 
 ## Step 2 — Identify New Insights
 
-1. Read `wiki/index.md` to understand current wiki coverage.
+1. Read `vault/wiki/index.md` to understand current wiki coverage.
 2. Compare the output's content against existing wiki pages.
 3. Run `python3 tools/search.py "<key terms>"` to find existing pages that may already cover the insights.
 4. Identify insights that are **not yet present** in the wiki:
    - New concepts not covered by any existing concept file.
    - New information that extends or refines existing concept or summary files.
    - New connections between existing concepts not yet documented.
-5. Check if the output reveals topic-level connections (comparisons, selection guides, unifying narratives across 3+ concepts). If so, consider creating or updating a topic file in `wiki/topics/`.
+5. Check if the output reveals topic-level connections (comparisons, selection guides, unifying narratives across 3+ concepts). If so, consider creating or updating a topic file in `vault/wiki/topics/`.
 
 ### Deduplication Rules
 
-- Before creating a new concept file, check `wiki/concepts/` for existing files that cover the same topic.
+- Before creating a new concept file, check `vault/wiki/concepts/` for existing files that cover the same topic.
 - Search for similar titles, overlapping tags, and related domain values.
 - If an existing file covers the topic, **update** it with the new insights rather than creating a duplicate.
 - If the new insight is a minor addition, append it to the relevant existing file's content.
@@ -58,10 +58,10 @@ Skip this step when filing back an existing output file (reports, notes) — tho
 For each new insight identified:
 
 1. **Update existing files**: If the insight extends an existing concept or summary, add the new information to that file. Update the `updated:` frontmatter field.
-2. **Create new concept files**: If the insight is a new concept, create a file at `wiki/concepts/<concept-slug>.md` with:
+2. **Create new concept files**: If the insight is a new concept, create a file at `vault/wiki/concepts/<concept-slug>.md` with:
    - Valid YAML frontmatter with all 7 required fields.
    - `confidence: medium` (derived from a secondary source — the output).
-   - `source:` set to the output file path or the raw discussion file created in Step 0.
+   - `source:` set to the output file path or the staging discussion file created in Step 0.
    - At least one `[[backlink]]` to an existing wiki file.
    - Maximum 150 lines.
 
@@ -75,7 +75,7 @@ For each new insight identified:
 
 ## Step 5 — Update Index
 
-1. **`wiki/index.md`**: Add entries for any new wiki files created. Update summaries for any modified files. Update the `updated:` frontmatter field.
+1. **`vault/wiki/index.md`**: Add entries for any new wiki files created. Update summaries for any modified files. Update the `updated:` frontmatter field.
 2. The index MUST be updated before reporting completion.
 
 ## Step 6 — Update the File-Back Manifest
@@ -87,8 +87,8 @@ Update `tools/.fileback-manifest.json` with the filed output:
   "status": "filed",
   "filed_at": "<ISO 8601 timestamp>",
   "wiki_files_updated": [
-    "wiki/concepts/<concept1>.md",
-    "wiki/concepts/<concept2>.md"
+    "vault/wiki/concepts/<concept1>.md",
+    "vault/wiki/concepts/<concept2>.md"
   ]
 }
 ```
@@ -101,7 +101,7 @@ Update `tools/.fileback-manifest.json` with the filed output:
 
 Report a summary of what was filed back:
 
-- Raw discussion file created (if conversation file-back).
+- Staging discussion file created (if conversation file-back).
 - Number of existing wiki files updated.
 - Number of new concept files created.
 - List of all wiki files touched.

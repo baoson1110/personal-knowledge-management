@@ -1,16 +1,16 @@
 {
   "enabled": true,
   "name": "Topic Synthesis Check",
-  "description": "After a new summary file is created in wiki/summaries/, automatically check for topic synthesis opportunities by comparing the new summary against existing summaries and concepts in the same domain.",
+  "description": "After a new summary file is created in vault/wiki/summaries/, automatically check for topic synthesis opportunities by comparing the new summary against existing summaries and concepts in the same domain.",
   "version": "1",
   "when": {
     "type": "fileCreated",
     "patterns": [
-      "wiki/summaries/*.md"
+      "vault/wiki/summaries/*.md"
     ]
   },
   "then": {
     "type": "askAgent",
-    "prompt": "A new summary file was just created. Run a targeted topic synthesis check:\n\n1. Read the new summary file and extract its `domain:` and `tags:` from frontmatter.\n2. Run `python3 tools/analyze-wiki.py --topic-candidates` to get current topic clusters.\n3. Check if the new summary's domain has any cluster that now meets the auto-creation threshold:\n   - 2+ summaries in the same domain with substantially overlapping content\n   - 3+ concepts from those summaries are thematically related (overlapping tags or mutual backlinks)\n   - No existing topic file already covers this cluster\n4. If the threshold is met, auto-create the topic file at `wiki/topics/<topic-slug>.md` following wiki-conventions (Overview, Detailed Comparison, Linked Pages, See Also). Update linked concept files with backlinks to the new topic. Update wiki/index.md.\n5. If overlap is present but below threshold, report it as a suggestion: \"Topic candidate: <name> — connects <concepts>. Want me to create it?\"\n6. If no overlap detected, report: \"No new topic opportunities from this summary.\""
+    "prompt": "A new summary file was just created. Run a targeted topic synthesis check:\n\n1. Read the new summary file and extract its `domain:` and `tags:` from frontmatter.\n2. Run `python3 tools/analyze-wiki.py --topic-candidates` to get current topic clusters.\n3. Check if the new summary's domain has any cluster that now meets the auto-creation threshold:\n   - 2+ summaries in the same domain with substantially overlapping content\n   - 3+ concepts from those summaries are thematically related (overlapping tags or mutual backlinks)\n   - No existing topic file already covers this cluster\n4. If the threshold is met, auto-create the topic file at `vault/wiki/topics/<topic-slug>.md` following wiki-conventions (Overview, Detailed Comparison, Linked Pages, See Also). Update linked concept files with backlinks to the new topic. Update vault/wiki/index.md.\n5. If overlap is present but below threshold, report it as a suggestion: \"Topic candidate: <name> — connects <concepts>. Want me to create it?\"\n6. If no overlap detected, report: \"No new topic opportunities from this summary.\""
   }
 }

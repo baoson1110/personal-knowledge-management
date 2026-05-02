@@ -15,7 +15,7 @@ Covers all lint checks defined in .kiro/steering/lint-rules.md:
  10. LaTeX formula formatting (audit + auto-fix)
  11. Index completeness (files missing from index, dangling index refs)
  12. Image coverage (summaries/concepts missing images from source)
- 13. Unlocalized images (raw sources with external URLs not downloaded)
+ 13. Unlocalized images (staging sources with external URLs not downloaded)
 
 Usage:
   python3 tools/wiki_lint.py                  # Full audit (report only)
@@ -42,7 +42,7 @@ from typing import Any
 
 # ── Paths ────────────────────────────────────────────────────────────────────
 REPO_ROOT = Path(__file__).resolve().parent.parent
-WIKI_DIR = REPO_ROOT / "wiki"
+WIKI_DIR = REPO_ROOT / "vault" / "wiki"
 INDEX_PATH = WIKI_DIR / "index.md"
 TAGS_PATH = WIKI_DIR / "tags.yml"
 SUBDIRS = ["concepts", "summaries", "topics", "domains", "reference"]
@@ -143,7 +143,7 @@ def load_wiki_files() -> list[dict[str, Any]]:
 
 
 def load_index_backlinks() -> list[str]:
-    """Extract backlinks from wiki/index.md."""
+    """Extract backlinks from vault/wiki/index.md."""
     if not INDEX_PATH.exists():
         return []
     return extract_backlinks(INDEX_PATH.read_text(encoding="utf-8"))
@@ -167,7 +167,7 @@ def check_broken_links(files: list[dict]) -> list[dict]:
     # Check index.md
     for target in load_index_backlinks():
         if target not in slug_set:
-            broken.append({"source": "wiki/index.md", "target": target})
+            broken.append({"source": "vault/wiki/index.md", "target": target})
 
     return broken
 
@@ -449,7 +449,7 @@ def fix_latex(files: list[dict]) -> list[dict]:
 # ══════════════════════════════════════════════════════════════════════════════
 
 def check_index_completeness(files: list[dict]) -> dict[str, list[str]]:
-    """Check that wiki/index.md references all wiki files and has no dangling refs.
+    """Check that vault/wiki/index.md references all wiki files and has no dangling refs.
 
     Returns {"missing_from_index": [...], "dangling_in_index": [...]}.
     """
@@ -477,7 +477,7 @@ def _count_asset_images(text: str) -> int:
 
 
 def _read_source_file(source_path: str) -> str | None:
-    """Read a raw source file given its path from frontmatter."""
+    """Read a source file given its path from frontmatter."""
     fpath = REPO_ROOT / source_path
     if not fpath.is_file():
         return None
@@ -503,7 +503,7 @@ def check_image_coverage(files: list[dict]) -> dict[str, list[dict]]:
     for f in files:
         fm = f["frontmatter"]
         source_path = fm.get("source", "")
-        if not source_path or not source_path.startswith("raw/"):
+        if not source_path or not source_path.startswith("vault/staging/"):
             continue
 
         source_text = _read_source_file(source_path)
@@ -555,16 +555,16 @@ def check_image_coverage(files: list[dict]) -> dict[str, list[dict]]:
 # ══════════════════════════════════════════════════════════════════════════════
 
 def check_unlocalized_images() -> list[dict]:
-    """Scan raw sources for external image URLs not yet localized to asset/.
+    """Scan staging sources for external image URLs not yet localized to asset/.
 
-    Returns list of {path, count} for raw files with external image URLs.
+    Returns list of {path, count} for staging files with external image URLs.
     """
     results: list[dict] = []
-    raw_dir = REPO_ROOT / "raw"
-    if not raw_dir.is_dir():
+    staging_dir = REPO_ROOT / "vault" / "staging"
+    if not staging_dir.is_dir():
         return results
 
-    for fpath in sorted(raw_dir.rglob("*.md")):
+    for fpath in sorted(staging_dir.rglob("*.md")):
         if fpath.name.startswith("."):
             continue
         try:
@@ -691,7 +691,7 @@ def print_report(
         missing_idx = index_issues["missing_from_index"]
         dangling_idx = index_issues["dangling_in_index"]
         if missing_idx:
-            print(f"  Files NOT referenced in wiki/index.md: {len(missing_idx)}")
+            print(f"  Files NOT referenced in vault/wiki/index.md: {len(missing_idx)}")
             for slug in missing_idx:
                 print(f"    MISSING: [[{slug}]]")
         else:
@@ -736,13 +736,13 @@ def print_report(
     if unlocalized is not None:
         if unlocalized:
             total_ext = sum(u["count"] for u in unlocalized)
-            print(f"  Raw sources with external image URLs: {len(unlocalized)}")
+            print(f"  Staging sources with external image URLs: {len(unlocalized)}")
             for u in unlocalized:
                 print(f"    {u['path']}: {u['count']} external URL(s)")
             print(f"  Total: {total_ext} external images across {len(unlocalized)} files")
             print("  Action: Run Obsidian Local Images Plus plugin on these files")
         else:
-            print("  ✓ All raw source images are localized to asset/.")
+            print("  ✓ All staging source images are localized to asset/.")
         print(f"  Total: {sum(u['count'] for u in unlocalized) if unlocalized else 0}")
     else:
         print("  (skipped)")

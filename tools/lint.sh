@@ -2,7 +2,7 @@
 # lint.sh — Health-check the wiki for structural issues.
 # Usage: tools/lint.sh [--help]
 #
-# Scans all markdown files in wiki/ and reports:
+# Scans all markdown files in vault/wiki/ and reports:
 #   1. Broken [[...]] links (target file does not exist)
 #   2. Orphan files (zero inbound links, excluding index.md)
 #   3. Missing frontmatter fields (7 required fields)
@@ -15,7 +15,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-WIKI_DIR="$REPO_ROOT/wiki"
+WIKI_DIR="$REPO_ROOT/vault/wiki"
 
 # ── help ────────────────────────────────────────────────────────────
 usage() {
@@ -26,21 +26,21 @@ Scan the wiki for structural issues and produce a health report.
 
 Checks performed:
   1. Broken links     — [[...]] references where the target .md file
-                        does not exist anywhere in wiki/
+                        does not exist anywhere in vault/wiki/
   2. Orphan files     — wiki files with zero inbound [[...]] links
                         (index.md is excluded)
   3. Missing fields   — wiki files missing any of the 7 required
                         frontmatter fields: title, domain, tags,
                         created, updated, source, confidence
   4. Missing concepts — [[...]] references where no matching file
-                        exists in wiki/concepts/
+                        exists in vault/wiki/concepts/
 
 Options:
   --help    Show this help message and exit
 
 Exit codes:
   0  Success (report generated, even if issues found)
-  1  Error (missing wiki/ directory, etc.)
+  1  Error (missing vault/wiki/ directory, etc.)
 EOF
 }
 
@@ -51,7 +51,7 @@ fi
 
 # ── pre-flight checks ──────────────────────────────────────────────
 if [[ ! -d "$WIKI_DIR" ]]; then
-  echo "Error: wiki/ directory not found at $WIKI_DIR" >&2
+  echo "Error: vault/wiki/ directory not found at $WIKI_DIR" >&2
   exit 1
 fi
 
@@ -83,7 +83,7 @@ find "$WIKI_DIR" -type f -name '*.md' ! -name '.gitkeep' | sort > "$WIKI_FILES_L
 file_count=$(wc -l < "$WIKI_FILES_LIST" | tr -d ' ')
 
 if [[ "$file_count" -eq 0 ]]; then
-  echo "No markdown files found in wiki/"
+  echo "No markdown files found in vault/wiki/"
   echo ""
   echo "=== Wiki Lint Report ==="
   echo "Files scanned:    0"

@@ -21,20 +21,20 @@ Run both tools for a complete lint pass. The wiki_lint tool handles content-leve
 
 ## Lint Checks
 
-When the user issues a `lint` command, scan the entire `wiki/` directory and check for the following issues:
+When the user issues a `lint` command, scan the entire `vault/wiki/` directory and check for the following issues:
 
 ### 1. Broken Internal Links
 
 - Scan all wiki files for `[[...]]` backlinks.
 - For each backlink, verify that a corresponding `.md` file exists in the wiki.
-- A link `[[concept-name]]` is broken if no file named `concept-name.md` exists in `wiki/concepts/`, `wiki/summaries/`, `wiki/topics/`, or `wiki/domains/`.
+- A link `[[concept-name]]` is broken if no file named `concept-name.md` exists in `vault/wiki/concepts/`, `vault/wiki/summaries/`, `vault/wiki/topics/`, or `vault/wiki/domains/`.
 - Report each broken link with the source file and the missing target.
 
 ### 2. Orphan Files
 
 - Build an inbound link map across all wiki files.
 - A file is an orphan if it has **zero** inbound `[[...]]` links from other wiki files.
-- Exclude `wiki/index.md` from orphan detection (it is a structural file).
+- Exclude `vault/wiki/index.md` from orphan detection (it is a structural file).
 - Report each orphan file path.
 
 ### 3. Missing Frontmatter
@@ -45,8 +45,8 @@ When the user issues a `lint` command, scan the entire `wiki/` directory and che
 ### 4. Missing Concept Files
 
 - Scan all wiki files for concept names referenced via `[[...]]` backlinks.
-- If a referenced concept does not have a corresponding file in `wiki/concepts/`, flag it as a missing concept.
-- Exclude references that resolve to files in `wiki/summaries/`, `wiki/topics/`, or `wiki/domains/` — only flag truly missing pages.
+- If a referenced concept does not have a corresponding file in `vault/wiki/concepts/`, flag it as a missing concept.
+- Exclude references that resolve to files in `vault/wiki/summaries/`, `vault/wiki/topics/`, or `vault/wiki/domains/` — only flag truly missing pages.
 
 ### 5. Topic Synthesis
 
@@ -67,7 +67,7 @@ A topic MUST be created when ALL of the following are true:
 
 When auto-creating:
 
-1. Create the file at `wiki/topics/<topic-slug>.md` with valid YAML frontmatter (all 7 required fields).
+1. Create the file at `vault/wiki/topics/<topic-slug>.md` with valid YAML frontmatter (all 7 required fields).
 2. Set `confidence: high` and `source:` to the primary summary that anchors the cluster.
 3. The topic body MUST follow the Required Structure from wiki-conventions (Overview, Detailed Comparison or Narrative, Linked Pages, See Also).
 4. Include a Mermaid diagram or static image if the relationships or processes benefit from visual illustration.
@@ -83,7 +83,7 @@ If overlap signals are present but do not meet the auto-creation threshold (e.g.
 ### 6. Domain MOC Readiness
 
 - Run `python3 tools/wiki_lint.py --check domains` (or the full lint which includes this check).
-- Report any domain with **5+ concepts** that lacks a domain MOC file in `wiki/domains/`.
+- Report any domain with **5+ concepts** that lacks a domain MOC file in `vault/wiki/domains/`.
 - Report any domain with **3-4 concepts** as "approaching threshold."
 
 ### 7. Duplicate Concept Detection
@@ -99,10 +99,10 @@ If overlap signals are present but do not meet the auto-creation threshold (e.g.
 
 ### 9. Tag Registry Violations
 
-- Run `python3 tools/analyze-wiki.py --tag-audit` to validate all tags against `wiki/tags.yml`.
+- Run `python3 tools/analyze-wiki.py --tag-audit` to validate all tags against `vault/wiki/tags.yml`.
 - Report **alias violations**: tags that are known synonyms/abbreviations of a canonical tag (e.g. `rl` should be `reinforcement-learning`). These MUST be auto-fixed by replacing the alias with the canonical tag in the file's frontmatter.
 - Report **unregistered tags**: tags that do not appear in the registry at all. Present these to the user for decision:
-  - Add the tag to `wiki/tags.yml` as a new canonical tag, OR
+  - Add the tag to `vault/wiki/tags.yml` as a new canonical tag, OR
   - Replace it with an existing canonical tag.
 - Do NOT auto-add unregistered tags to the registry — only auto-fix alias violations.
 
@@ -125,14 +125,14 @@ If overlap signals are present but do not meet the auto-creation threshold (e.g.
 
 ### 12. Image Coverage
 
-Check that wiki summaries and concepts actively use images from their raw sources when available.
+Check that wiki summaries and concepts actively use images from their staging sources when available.
 
 #### 12a — Summary Missing Images (Error)
 
-- For each summary file, read its `source:` frontmatter to find the raw source.
-- Count `![[asset/...]]` image references in both the raw source and the summary.
-- If the raw source has images but the summary has **zero** → report as **ERROR** (missing visual content).
-- Skip sources with no `![[asset/...]]` images (text-only sources).
+- For each summary file, read its `source:` frontmatter to find the staging source.
+- Count `![[vault/asset/...]]` image references in both the staging source and the summary.
+- If the staging source has images but the summary has **zero** → report as **ERROR** (missing visual content).
+- Skip sources with no `![[vault/asset/...]]` images (text-only sources).
 
 #### 12b — Summary Low Coverage (Warning)
 
@@ -148,12 +148,12 @@ Check that wiki summaries and concepts actively use images from their raw source
 
 ### 13. Unlocalized Images
 
-Scan all raw source files for external image URLs (`![...](https://...)`) that have not been downloaded to `asset/` by the Obsidian Local Images Plus plugin.
+Scan all staging source files for external image URLs (`![...](https://...)`) that have not been downloaded to `vault/asset/` by the Obsidian Local Images Plus plugin.
 
-- Scan all `.md` files under `raw/` for markdown image syntax with `http://` or `https://` URLs.
+- Scan all `.md` files under `vault/staging/` for markdown image syntax with `http://` or `https://` URLs.
 - Exclude matches inside code blocks.
 - Report each file with the count of external URLs.
-- **Action**: Run the Obsidian Local Images Plus plugin on flagged files to download images to `asset/` and rewrite references.
+- **Action**: Run the Obsidian Local Images Plus plugin on flagged files to download images to `vault/asset/` and rewrite references.
 
 **Auto-fix**: No — requires running the Obsidian plugin interactively.
 
@@ -169,14 +169,14 @@ When lint identifies missing concept files:
    - `source: "web search YYYY-MM-DD"` if web-imputed, or `source: "skeleton"` if not researched.
    - A `[needs verification]` placeholder in the body indicating the content is unverified.
    - At least one `[[backlink]]` to an existing wiki file.
-4. Skeleton files are placed in `wiki/concepts/<concept-slug>.md`.
+4. Skeleton files are placed in `vault/wiki/concepts/<concept-slug>.md`.
 5. If more than 5 concepts are missing, report the remaining ones and let the user decide.
 
 ## Web-Impute Rules
 
 When the user issues a `web-impute: <topic>` command:
 
-1. Create a skeleton concept file at `wiki/concepts/<topic-slug>.md`.
+1. Create a skeleton concept file at `vault/wiki/concepts/<topic-slug>.md`.
 2. Research the topic using web search.
 3. Fill in the concept file with researched content.
 4. Set frontmatter fields:
@@ -189,7 +189,7 @@ When the user issues a `web-impute: <topic>` command:
 
 After the lint run completes:
 
-1. Update `wiki/index.md` to include entries for any newly created skeleton concept files.
+1. Update `vault/wiki/index.md` to include entries for any newly created skeleton concept files.
 2. Update the `updated:` frontmatter field.
 
 ## Lint Summary Report
@@ -206,12 +206,12 @@ After all checks and fixes are complete, report a summary to the user:
 - **Duplicate candidates**: count and list of concept pairs that may need merging.
 - **Cross-linking gaps**: count of weakly linked concepts and unlinked same-domain pairs.
 - **Tag alias violations**: count and list of tags auto-fixed to their canonical form.
-- **Unregistered tags**: count and list of tags not in `wiki/tags.yml`, with affected files.
+- **Unregistered tags**: count and list of tags not in `vault/wiki/tags.yml`, with affected files.
 - **LaTeX formatting fixes**: count and list of files where plain-text formulas were converted to LaTeX.
 - **Image coverage errors**: count and list of summaries with zero images despite source having images.
 - **Image coverage warnings**: count and list of summaries with less than 50% image coverage.
 - **Image coverage suggestions**: count and list of concepts with no images whose source has 5+ images.
-- **Unlocalized images**: count and list of raw sources with external image URLs not yet downloaded to `asset/`.
+- **Unlocalized images**: count and list of staging sources with external image URLs not yet downloaded to `vault/asset/`.
 - **Skeleton concepts created**: count and list of new skeleton files created (up to 5).
 - **Links fixed**: count of any links that were corrected.
 - **Index updated**: confirmation that the index was refreshed.

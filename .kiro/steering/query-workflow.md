@@ -8,12 +8,12 @@ Procedure for answering user queries and generating reports from wiki content. A
 
 ## Step 1 — Load Context
 
-1. Read `wiki/index.md` to understand the wiki's current coverage and identify candidate pages by title and summary.
+1. Read `vault/wiki/index.md` to understand the wiki's current coverage and identify candidate pages by title and summary.
 
 ## Step 2 — Search the Wiki
 
-1. Search `wiki/` for pages relevant to the user's question.
-2. Use `wiki/index.md` entries to identify the most relevant concept, summary, and topic files.
+1. Search `vault/wiki/` for pages relevant to the user's question.
+2. Use `vault/wiki/index.md` entries to identify the most relevant concept, summary, and topic files.
 3. Read the most relevant concept files, summary files, and topic files.
 4. Follow `[[backlinks]]` to discover related pages that may contain supporting information.
 5. If available, use `tools/search.py` for full-text search across wiki files.
@@ -40,7 +40,7 @@ Procedure for answering user queries and generating reports from wiki content. A
 
 When the user issues a `report: <topic>` command:
 
-1. Generate a markdown report file at `outputs/reports/report-<topic-slug>-YYYY-MM-DD.md`.
+1. Generate a markdown report file at `vault/outputs/reports/report-<topic-slug>-YYYY-MM-DD.md`.
 2. Use lowercase hyphen-separated slugs for the topic portion of the filename.
 3. Use today's date in `YYYY-MM-DD` format.
 4. The report MUST include:

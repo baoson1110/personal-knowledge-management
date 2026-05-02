@@ -10,7 +10,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-OUTPUTS_DIR="$REPO_ROOT/outputs"
+OUTPUTS_DIR="$REPO_ROOT/vault/outputs"
 MANIFEST="$SCRIPT_DIR/.fileback-manifest.json"
 
 # ── help ────────────────────────────────────────────────────────────
@@ -27,7 +27,7 @@ Subcommands:
 
 Arguments:
   <output-path>  Path to an output file relative to repo root
-                 (e.g. outputs/reports/report-topic-2025-01-20.md)
+                 (e.g. vault/outputs/reports/report-topic-2025-01-20.md)
 
 Options:
   --help    Show this help message and exit
@@ -49,7 +49,7 @@ fi
 
 # ── pre-flight checks ──────────────────────────────────────────────
 if [[ ! -d "$OUTPUTS_DIR" ]]; then
-  echo "Error: outputs/ directory not found at $OUTPUTS_DIR" >&2
+  echo "Error: vault/outputs/ directory not found at $OUTPUTS_DIR" >&2
   exit 1
 fi
 
@@ -96,9 +96,9 @@ do_mark() {
     output_path="${output_path#"$REPO_ROOT"/}"
   fi
 
-  # Validate the output path starts with outputs/
-  if [[ "$output_path" != outputs/* ]]; then
-    echo "Error: path must be under outputs/: $output_path" >&2
+  # Validate the output path starts with vault/outputs/
+  if [[ "$output_path" != vault/outputs/* ]]; then
+    echo "Error: path must be under vault/outputs/: $output_path" >&2
     return 1
   fi
 

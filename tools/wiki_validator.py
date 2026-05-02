@@ -197,7 +197,7 @@ def validate_summary_sections(text: str) -> List[str]:
 
 # --- Tag Registry ---
 
-_TAG_REGISTRY_PATH = Path(__file__).resolve().parent.parent / "wiki" / "tags.yml"
+_TAG_REGISTRY_PATH = Path(__file__).resolve().parent.parent / "vault" / "wiki" / "tags.yml"
 
 
 def _parse_tags_yml(text: str) -> Tuple[Dict[str, dict], Dict[str, str]]:
