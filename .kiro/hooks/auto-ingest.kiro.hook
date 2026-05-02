@@ -1,13 +1,13 @@
 {
   "name": "Auto Ingest",
-  "version": "1",
-  "description": "When a new file is created in vault/staging/, automatically trigger the ingest workflow to compile the new staged source into the wiki.",
+  "version": "2",
+  "description": "When a new file is created in vault/staging/, run pre-flight validation then compile into the wiki with post-check.",
   "when": {
     "type": "fileCreated",
     "patterns": ["vault/staging/**"]
   },
   "then": {
     "type": "askAgent",
-    "prompt": "A new file was created in vault/staging/. Follow the ingest-workflow steering file (.kiro/steering/ingest-workflow.md) to compile this new staged source into the wiki. Create a summary file in vault/wiki/summaries/, extract 1-3 concept files into vault/wiki/concepts/, update the relevant domain MOC in vault/wiki/domains/, and update vault/wiki/index.md to reflect the new content. Update tools/.compile-manifest.json to record the compilation."
+    "prompt": "A new file was created in vault/staging/. Before compiling:\n\n1. **Pre-check**: Run `python3 tools/pre_ingest_check.py <source-path>` on the new file. If it returns BLOCKED (e.g. unlocalized images), stop and report the issue to the user — do NOT proceed with compilation. If it returns warnings, note them but proceed.\n2. **Compile**: Follow the ingest-workflow steering file (.kiro/steering/ingest-workflow.md) to compile this new staged source into the wiki. Create a summary file in vault/wiki/summaries/, extract 1-3 concept files into vault/wiki/concepts/, update the relevant domain MOC in vault/wiki/domains/, and update vault/wiki/index.md to reflect the new content. Update tools/.compile-manifest.json to record the compilation.\n3. **Post-check**: Run `python3 tools/post_ingest_check.py <source-path>` to validate the output. If any checks fail (missing frontmatter, broken links, missing from index, etc.), fix the issues before reporting completion."
   }
 }

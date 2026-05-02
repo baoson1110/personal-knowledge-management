@@ -1,12 +1,12 @@
 {
   "name": "Lint Trigger",
-  "version": "1",
-  "description": "User-triggered hook to execute the full wiki lint operation.",
+  "version": "2",
+  "description": "User-triggered hook to execute the full wiki lint operation with post-ingest validation.",
   "when": {
     "type": "userTriggered"
   },
   "then": {
     "type": "askAgent",
-    "prompt": "Execute the full wiki lint operation following the lint-rules steering file (.kiro/steering/lint-rules.md). Scan the wiki for: broken internal [[backlinks]], orphan files with no inbound links, files missing required frontmatter fields, concept names referenced in wiki text but lacking their own concept file, and mathematical formulas not wrapped in LaTeX delimiters. Auto-fix LaTeX formatting issues by converting plain-text math to proper $...$ (inline) and $...$ (display) notation. Create skeleton concept files (max 5 per run) for missing concepts with confidence: low and [needs verification] placeholders. Update vault/wiki/index.md and report a summary of issues found, concepts created, links fixed, and LaTeX formulas converted."
+    "prompt": "Execute the full wiki lint operation following the lint-rules steering file (.kiro/steering/lint-rules.md). Scan the wiki for: broken internal [[backlinks]], orphan files with no inbound links, files missing required frontmatter fields, concept names referenced in wiki text but lacking their own concept file, and mathematical formulas not wrapped in LaTeX delimiters. Auto-fix LaTeX formatting issues by converting plain-text math to proper $...$ (inline) and $...$ (display) notation. Create skeleton concept files (max 5 per run) for missing concepts with confidence: low and [needs verification] placeholders. Update vault/wiki/index.md and report a summary of issues found, concepts created, links fixed, and LaTeX formulas converted.\n\nAfter the standard lint, also run `python3 tools/post_ingest_check.py --all` to validate all compiled sources have correct manifest entries, valid frontmatter, image coverage, and index completeness. Report any failures from the post-ingest check alongside the lint results."
   }
 }

@@ -1,12 +1,12 @@
 {
   "name": "Scan Trigger",
-  "version": "1",
-  "description": "User-triggered hook to scan and compile all uncompiled staged sources.",
+  "version": "2",
+  "description": "User-triggered hook to scan and compile all uncompiled staged sources with pre/post validation.",
   "when": {
     "type": "userTriggered"
   },
   "then": {
     "type": "askAgent",
-    "prompt": "Run `python3 tools/scan_sources.py --pending` to identify uncompiled or modified staged sources. If there are pending sources, follow the ingest-workflow steering file (.kiro/steering/ingest-workflow.md) to compile each one into the wiki. Report the final status."
+    "prompt": "Run `python3 tools/scan_sources.py --pending` to identify uncompiled or modified staged sources. If there are pending sources, for EACH pending source:\n\n1. **Pre-check**: Run `python3 tools/pre_ingest_check.py <source-path>` first. If it returns BLOCKED (e.g. unlocalized images), skip that source and report the issue. If it returns warnings, note them but proceed.\n2. **Compile**: Follow the ingest-workflow steering file (.kiro/steering/ingest-workflow.md) to compile the source into the wiki.\n3. **Post-check**: After compilation, run `python3 tools/post_ingest_check.py <source-path>` to validate the output. If any checks fail, fix the issues before moving to the next source.\n\nReport the final status including any blocked sources, warnings, and post-check results."
   }
 }
